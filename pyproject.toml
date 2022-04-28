@@ -22,9 +22,10 @@ mypy_path = "src"
 
 [[tool.mypy.overrides]]
 module = [
-    'scipy.*',
+    'qiskit.*',
+    'scipy.optimize',
     'sympy.*',
-    'rapidjson',
+    'symengine.*',
 ]
 ignore_missing_imports = true
 
