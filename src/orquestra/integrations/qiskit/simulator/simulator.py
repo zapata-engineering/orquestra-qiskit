@@ -2,21 +2,21 @@
 # © Copyright 2020-2022 Zapata Computing Inc.
 ################################################################################
 import sys
-from numbers import Complex
 from typing import List, Optional
 
 import numpy as np
-from qeqiskit.conversions import export_to_qiskit
+from orquestra.quantum.api.backend import QuantumSimulator, StateVector
+from orquestra.quantum.circuits import Circuit
+from orquestra.quantum.circuits.layouts import CircuitConnectivity
+from orquestra.quantum.measurements import Measurements, sample_from_wavefunction
+from orquestra.quantum.wavefunction import flip_amplitudes
 from qiskit import Aer, ClassicalRegister, QuantumCircuit, execute
 from qiskit.providers.aer.noise import NoiseModel
 from qiskit.providers.ibmq import IBMQ
 from qiskit.providers.ibmq.exceptions import IBMQAccountError
 from qiskit.transpiler import CouplingMap
-from zquantum.core.circuits import Circuit
-from zquantum.core.circuits.layouts import CircuitConnectivity
-from zquantum.core.interfaces.backend import QuantumSimulator, StateVector
-from zquantum.core.measurement import Measurements, sample_from_wavefunction
-from zquantum.core.wavefunction import flip_amplitudes
+
+from orquestra.integrations.qiskit.conversions import export_to_qiskit
 
 
 class QiskitSimulator(QuantumSimulator):

@@ -3,13 +3,14 @@
 ################################################################################
 import pytest
 import qiskit
-from qeqiskit.conversions._qiskit_expressions import (
+from orquestra.quantum.circuits.symbolic.expressions import FunctionCall, Symbol
+from orquestra.quantum.circuits.symbolic.translations import translate_expression
+
+from orquestra.integrations.qiskit.conversions._qiskit_expressions import (
     QISKIT_DIALECT,
     expression_from_qiskit,
     integer_pow,
 )
-from zquantum.core.circuits.symbolic.expressions import FunctionCall, Symbol
-from zquantum.core.circuits.symbolic.translations import translate_expression
 
 THETA = qiskit.circuit.Parameter("theta")
 PHI = qiskit.circuit.Parameter("phi")

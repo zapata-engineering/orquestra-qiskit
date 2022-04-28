@@ -7,13 +7,13 @@ from functools import singledispatch
 from numbers import Number
 
 import symengine
-from symengine.lib.symengine_wrapper import ImaginaryUnit
-from zquantum.core.circuits.symbolic.expressions import (
+from orquestra.quantum.circuits.symbolic.expressions import (
     ExpressionDialect,
     FunctionCall,
     Symbol,
     reduction,
 )
+from symengine.lib.symengine_wrapper import ImaginaryUnit
 
 
 def is_multiplication_by_reciprocal(symengine_mul: symengine.Mul) -> bool:

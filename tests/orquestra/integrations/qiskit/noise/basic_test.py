@@ -5,7 +5,10 @@ import os
 import unittest
 
 import qiskit.providers.aer.noise as AerNoise
-from qeqiskit.noise.basic import (
+from orquestra.quantum.circuits.layouts import CircuitConnectivity
+from qiskit.providers.exceptions import QiskitBackendNotFoundError
+
+from orquestra.integrations.qiskit.noise.basic import (
     create_amplitude_damping_noise,
     create_phase_and_amplitude_damping_error,
     create_phase_damping_noise,
@@ -13,8 +16,6 @@ from qeqiskit.noise.basic import (
     get_kraus_matrices_from_ibm_noise_model,
     get_qiskit_noise_model,
 )
-from qiskit.providers.exceptions import QiskitBackendNotFoundError
-from zquantum.core.circuits.layouts import CircuitConnectivity
 
 
 class TestBasic(unittest.TestCase):

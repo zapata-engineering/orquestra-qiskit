@@ -5,6 +5,7 @@ from typing import Dict, Optional, Tuple
 
 import numpy as np
 import qiskit.providers.aer.noise as AerNoise
+from orquestra.quantum.circuits.layouts import CircuitConnectivity
 from qiskit.providers.aer.noise import (
     NoiseModel,
     amplitude_damping_error,
@@ -15,7 +16,6 @@ from qiskit.providers.aer.noise import (
 from qiskit.providers.ibmq import IBMQ
 from qiskit.providers.ibmq.exceptions import IBMQAccountError
 from qiskit.quantum_info import Kraus
-from zquantum.core.circuits.layouts import CircuitConnectivity
 
 
 def get_qiskit_noise_model(

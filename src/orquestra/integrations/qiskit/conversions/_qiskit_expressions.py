@@ -14,8 +14,8 @@ from functools import lru_cache, reduce, singledispatch
 from numbers import Number
 
 import qiskit
-from zquantum.core.circuits.symbolic.expressions import ExpressionDialect, reduction
-from zquantum.core.circuits.symbolic.sympy_expressions import expression_from_sympy
+from orquestra.quantum.circuits.symbolic.expressions import ExpressionDialect, reduction
+from orquestra.quantum.circuits.symbolic.sympy_expressions import expression_from_sympy
 
 from ._symengine_expressions import expression_from_symengine
 

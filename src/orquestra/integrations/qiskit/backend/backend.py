@@ -6,7 +6,9 @@ import time
 from copy import deepcopy
 from typing import Dict, List, Optional, Sequence, Tuple
 
-from qeqiskit.conversions import export_to_qiskit
+from orquestra.quantum.api.backend import QuantumBackend
+from orquestra.quantum.circuits import Circuit
+from orquestra.quantum.measurements import Measurements
 from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister, execute
 from qiskit.circuit.gate import Gate as QiskitGate
 from qiskit.ignis.mitigation.measurement import (
@@ -18,9 +20,8 @@ from qiskit.providers.ibmq import IBMQ
 from qiskit.providers.ibmq.exceptions import IBMQAccountError, IBMQBackendJobLimitError
 from qiskit.providers.ibmq.job import IBMQJob
 from qiskit.result import Counts
-from zquantum.core.circuits import Circuit
-from zquantum.core.interfaces.backend import QuantumBackend
-from zquantum.core.measurement import Measurements
+
+from orquestra.integrations.qiskit.conversions import export_to_qiskit
 
 
 class QiskitBackend(QuantumBackend):

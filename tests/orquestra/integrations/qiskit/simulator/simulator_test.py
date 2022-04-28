@@ -5,17 +5,18 @@ import os
 
 import pytest
 import qiskit.providers.aer.noise as AerNoise
-from qeqiskit.noise import get_qiskit_noise_model
-from qeqiskit.simulator import QiskitSimulator
-from zquantum.core.circuits import CNOT, Circuit, X
-from zquantum.core.estimation import estimate_expectation_values_by_averaging
-from zquantum.core.interfaces.backend_test import (
+from orquestra.quantum.api.backend_test import (
     QuantumSimulatorGatesTest,
     QuantumSimulatorTests,
 )
-from zquantum.core.interfaces.estimation import EstimationTask
-from zquantum.core.measurement import ExpectationValues
-from zquantum.core.openfermion.ops import QubitOperator
+from orquestra.quantum.api.estimation import EstimationTask
+from orquestra.quantum.circuits import CNOT, Circuit, X
+from orquestra.quantum.estimation import estimate_expectation_values_by_averaging
+from orquestra.quantum.measurements import ExpectationValues
+from orquestra.quantum.openfermion.ops import QubitOperator
+
+from orquestra.integrations.qiskit.noise import get_qiskit_noise_model
+from orquestra.integrations.qiskit.simulator import QiskitSimulator
 
 
 @pytest.fixture(

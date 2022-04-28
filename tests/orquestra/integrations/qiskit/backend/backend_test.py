@@ -7,12 +7,13 @@ from copy import deepcopy
 
 import pytest
 import qiskit
-from qeqiskit.backend import QiskitBackend
-from qeqiskit.conversions import export_to_qiskit
+from orquestra.quantum.api.backend_test import QuantumBackendTests
+from orquestra.quantum.circuits import CNOT, Circuit, X
+from orquestra.quantum.measurements import Measurements
 from qiskit.providers.exceptions import QiskitBackendNotFoundError
-from zquantum.core.circuits import CNOT, Circuit, X
-from zquantum.core.interfaces.backend_test import QuantumBackendTests
-from zquantum.core.measurement import Measurements
+
+from orquestra.integrations.qiskit.backend import QiskitBackend
+from orquestra.integrations.qiskit.conversions import export_to_qiskit
 
 
 @pytest.fixture(

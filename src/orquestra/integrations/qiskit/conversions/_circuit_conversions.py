@@ -7,12 +7,12 @@ from typing import Dict, Iterable, List, NamedTuple, Sequence, Tuple, Union
 import numpy as np
 import qiskit
 import sympy
-from zquantum.core.circuits import _builtin_gates, _circuit, _gates
-from zquantum.core.circuits.symbolic.sympy_expressions import (
+from orquestra.quantum.circuits import _builtin_gates, _circuit, _gates
+from orquestra.quantum.circuits.symbolic.sympy_expressions import (
     SYMPY_DIALECT,
     expression_from_sympy,
 )
-from zquantum.core.circuits.symbolic.translations import translate_expression
+from orquestra.quantum.circuits.symbolic.translations import translate_expression
 
 from ._qiskit_expressions import QISKIT_DIALECT, expression_from_qiskit
 
