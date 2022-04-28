@@ -1,11 +1,32 @@
-# orquestra-python-template
-This is a template repository for Orquestra Python projects.
+# qe-qiskit
 
-After creating repository from this template, make sure to follow the steps below:
+[![codecov](https://codecov.io/gh/zapatacomputing/qe-qiskit/branch/main/graph/badge.svg?token=G64YYS2IOS)](https://codecov.io/gh/zapatacomputing/orquestra-qiskit)
 
-1. Specify license. Supply LICENSE file and fill license entry in `setup.cfg` accordingly.
-2. Update `setup.cfg`. At the very least update the following fields:
-   - `[metadata]` section: `name`, `description`, `license`, `license_file`, 
-   - `install_requires` in `[options]` section. You don't have to do this at the very beginning and you may add requirements as you go, but be warry that the ones present in this repository are only example ones and may not be applicable to your project.
-3. Substitute an example `orquestra.pythontemplate` package `src/` directory with your actual code. Remember, that `orquestra` is a namespace package, so you *cannot* put an `__init__.py` in `src/orquestra` directory. Remove tests for the dummy package and replace them with meaningful ones as you develop your package.
-4. Remove this instruction and replace it with a meaningful description of your package.
+An Orquestra Resource for Qiskit
+
+## Overview
+
+`orquestra-qiskit` is a Python module that exposes Qiskit's simulators as an [`orquestra`](https://github.com/zapatacomputing/orquestra-quantum/blob/main/src/orquestra/quantum/api/backend.py) `QuantumSimulator`. It can be imported with:
+
+```
+from orquestra.integrations.qiskit.simulator import QiskitSimulator
+```
+
+It also exposes Qiskit's quantum backends as a `QiskitBackend` which implements the `orquestra.quantum.api.backend.QuantumBackend` interface.
+
+It can be imported with:
+
+```
+from orquestra.integrations.qiskit.backend import QiskitBackend
+```
+
+In addition, it also provides converters that allow switching between `qiskit` circuits and those of `orquestra`.
+
+The module can be used directly in Python or in an [Orquestra](https://www.orquestra.io) workflow.
+For more details, see the [Orquestra Qiskit integration docs](http://docs.orquestra.io/other-resources/framework-integrations/qiskit/).
+
+For more information regarding Orquestra and resources, please refer to the [Orquestra documentation](https://www.orquestra.io/docs).
+
+## Development and contribution
+
+You can find the development guidelines in the [`z-quantum-core` repository](https://github.com/zapatacomputing/z-quantum-core).
