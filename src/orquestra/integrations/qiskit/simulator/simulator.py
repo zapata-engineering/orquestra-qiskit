@@ -149,7 +149,7 @@ class QiskitSimulator(QuantumSimulator):
         Args:
             circuit (zquantum.core.circuit.Circuit): the circuit to prepare the state
         Returns:
-            pyquil.wavefunction.Wavefunction
+            zquantum.core.wavefunction.Wavefunction
         """
         ibmq_circuit = export_to_qiskit(circuit)
 
@@ -176,4 +176,4 @@ class QiskitSimulator(QuantumSimulator):
             seed_transpiler=self.seed,
         )
         wavefunction = job.result().get_statevector(ibmq_circuit, decimals=20)
-        return flip_amplitudes(wavefunction)
+        return flip_amplitudes(wavefunction.data)
