@@ -1,5 +1,5 @@
 ################################################################################
-#© Copyright 2021-2022 Zapata Computing Inc.
+# © Copyright 2021-2022 Zapata Computing Inc.
 ################################################################################
 """Test cases for symengine_expressions module."""
 import pytest

@@ -1,5 +1,5 @@
 ################################################################################
-#© Copyright 2020-2022 Zapata Computing Inc.
+# © Copyright 2020-2022 Zapata Computing Inc.
 ################################################################################
 from .basic import (
     create_amplitude_damping_noise,
