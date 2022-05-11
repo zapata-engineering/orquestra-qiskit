@@ -1,8 +1,15 @@
 # orquestra-qiskit
 
-An Orquestra Resource for Qiskit
+## What is it?
 
-## Overview
+`orquestra-qiskit` is a [Zapata](https://www.zapatacomputing.com) library holding modules for integrating qiskit with [Orquestra](https://www.zapatacomputing.com/orquestra/).
+
+## Installation
+
+Even though it's intended to be used with Orquestra, `orquestra-qiskit` can be also used as a Python module.
+Just run `pip install .` from the main directory.
+
+## Usage
 
 `orquestra-qiskit` is a Python module that exposes Qiskit's simulators as an [`orquestra`](https://github.com/zapatacomputing/orquestra-quantum/blob/main/src/orquestra/quantum/api/backend.py) `QuantumSimulator`. It can be imported with:
 
