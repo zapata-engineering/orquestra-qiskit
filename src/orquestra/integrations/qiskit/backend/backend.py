@@ -41,7 +41,7 @@ class QiskitBackend(QuantumBackend):
         **kwargs,
     ):
         """Get a qiskit QPU that adheres to the
-        zquantum.core.interfaces.backend.QuantumBackend
+        orquestra.quantum.api.backend.QuantumBackend
 
         qiskit currently offers 2 types of qasm simulators:
         1. qasm_simulator - a local simulator that is depreciated.

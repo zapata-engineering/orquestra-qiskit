@@ -35,7 +35,7 @@ class QiskitSimulator(QuantumSimulator):
         **kwargs,
     ):
         """Get a qiskit device (simulator or QPU) that adheres to the
-        zquantum.core.interfaces.backend.QuantumSimulator
+        orquestra.quantum.api.backend.QuantumSimulator
 
         Args:
             device_name: the name of the device
@@ -147,9 +147,10 @@ class QiskitSimulator(QuantumSimulator):
         """Run a circuit and get the wavefunction of the resulting statevector.
 
         Args:
-            circuit (zquantum.core.circuit.Circuit): the circuit to prepare the state
+            circuit (orquestra.quantum.circuit.Circuit): the circuit to
+                prepare the state.
         Returns:
-            zquantum.core.wavefunction.Wavefunction
+            orquestra.quantum.wavefunction.Wavefunction
         """
         ibmq_circuit = export_to_qiskit(circuit)
 

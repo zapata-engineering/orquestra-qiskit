@@ -77,7 +77,7 @@ SYMENGINE_EXPRESSIONS = [
 
 
 @pytest.mark.parametrize("symengine_expression", SYMENGINE_EXPRESSIONS)
-def test_roundtrip_between_symengine_and_zquantum_expressions(symengine_expression):
+def test_roundtrip_between_symengine_and_orquestra_expressions(symengine_expression):
     assert (
         _to_symengine(expression_from_symengine(symengine_expression))
         == symengine_expression

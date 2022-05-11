@@ -31,17 +31,17 @@ def _import_qiskit_qubit(qubit: qiskit.circuit.Qubit) -> int:
     return qubit.index
 
 
-def _qiskit_expr_from_zquantum(expr):
+def _qiskit_expr_from_orquestra(expr):
     intermediate = expression_from_sympy(expr)
     return translate_expression(intermediate, QISKIT_DIALECT)
 
 
-def _zquantum_expr_from_qiskit(expr):
+def _orquestra_expr_from_qiskit(expr):
     intermediate = expression_from_qiskit(expr)
     return translate_expression(intermediate, SYMPY_DIALECT)
 
 
-ZQUANTUM_QISKIT_GATE_MAP = {
+ORQUESTRA_QISKIT_GATE_MAP = {
     _builtin_gates.X: qiskit.circuit.library.XGate,
     _builtin_gates.Y: qiskit.circuit.library.YGate,
     _builtin_gates.Z: qiskit.circuit.library.ZGate,
@@ -85,8 +85,8 @@ def _make_controlled_gate_prototype(wrapped_gate_ref, num_control_qubits=1):
     return _factory
 
 
-QISKIT_ZQUANTUM_GATE_MAP = {
-    **{q_cls: z_ref for z_ref, q_cls in ZQUANTUM_QISKIT_GATE_MAP.items()},
+QISKIT_ORQUESTRA_GATE_MAP = {
+    **{q_cls: z_ref for z_ref, q_cls in ORQUESTRA_QISKIT_GATE_MAP.items()},
     qiskit.circuit.library.CSwapGate: _builtin_gates.SWAP.controlled(1),
     qiskit.circuit.library.CRXGate: _make_controlled_gate_prototype(_builtin_gates.RX),
     qiskit.circuit.library.CRYGate: _make_controlled_gate_prototype(_builtin_gates.RY),
@@ -144,13 +144,13 @@ def _export_gate_via_mapping(
     gate, applied_qubit_indices, n_qubits_in_circuit, custom_names
 ):
     try:
-        qiskit_cls = ZQUANTUM_QISKIT_GATE_MAP[
+        qiskit_cls = ORQUESTRA_QISKIT_GATE_MAP[
             _builtin_gates.builtin_gate_by_name(gate.name)
         ]
     except KeyError:
         raise ValueError(f"Can't export gate {gate} to Qiskit via mapping")
 
-    qiskit_params = [_qiskit_expr_from_zquantum(param) for param in gate.params]
+    qiskit_params = [_qiskit_expr_from_orquestra(param) for param in gate.params]
     qiskit_qubits = [
         qiskit_qubit(qubit_i, n_qubits_in_circuit) for qubit_i in applied_qubit_indices
     ]
@@ -291,18 +291,18 @@ def _import_qiskit_op_via_mapping(
     qiskit_qubits: Iterable[qiskit.circuit.Qubit],
 ) -> _gates.GateOperation:
     try:
-        gate_ref = QISKIT_ZQUANTUM_GATE_MAP[type(qiskit_gate)]
+        gate_ref = QISKIT_ORQUESTRA_GATE_MAP[type(qiskit_gate)]
     except KeyError:
         raise ValueError(f"Conversion of {qiskit_gate} from Qiskit is unsupported.")
 
     # values to consider:
     # - gate matrix parameters (only parametric gates)
     # - gate application indices (all gates)
-    zquantum_params = [
-        _zquantum_expr_from_qiskit(param) for param in qiskit_gate.params
+    orquestra_params = [
+        _orquestra_expr_from_qiskit(param) for param in qiskit_gate.params
     ]
     qubit_indices = [_import_qiskit_qubit(qubit) for qubit in qiskit_qubits]
-    gate = _make_gate_instance(gate_ref, zquantum_params)
+    gate = _make_gate_instance(gate_ref, orquestra_params)
     return _gates.GateOperation(gate=gate, qubit_indices=tuple(qubit_indices))
 
 
