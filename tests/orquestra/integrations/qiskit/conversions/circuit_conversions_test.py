@@ -460,7 +460,10 @@ class TestExportingToQiskit:
 
     @pytest.mark.parametrize(
         "orquestra_circuit",
-        [orquestra_circuit for orquestra_circuit, _ in EQUIVALENT_PARAMETRIZED_CIRCUITS],
+        [
+            orquestra_circuit
+            for orquestra_circuit, _ in EQUIVALENT_PARAMETRIZED_CIRCUITS
+        ],
     )
     def test_exporting_parametrized_circuit_doesnt_change_symbol_names(
         self, orquestra_circuit
