@@ -7,7 +7,7 @@ Attributes:
     QISKIT_DIALECT: Mapping from the intermediate expression tree into atoms
         used in Qiskit symbolic expressions. Allows translating an expression
         into the Qiskit dialect. Can be used with
-        `zquantum.core.circuit.symbolic.translations.translate_expression`.
+        `orquestra.quantum.circuits.symbolic.translations.translate_expression`.
 """
 import operator
 from functools import lru_cache, reduce, singledispatch

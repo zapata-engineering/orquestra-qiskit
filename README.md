@@ -1,10 +1,15 @@
-# qe-qiskit
+# orquestra-qiskit
 
-[![codecov](https://codecov.io/gh/zapatacomputing/qe-qiskit/branch/main/graph/badge.svg?token=G64YYS2IOS)](https://codecov.io/gh/zapatacomputing/orquestra-qiskit)
+## What is it?
 
-An Orquestra Resource for Qiskit
+`orquestra-qiskit` is a [Zapata](https://www.zapatacomputing.com) library holding modules for integrating qiskit with [Orquestra](https://www.zapatacomputing.com/orquestra/).
 
-## Overview
+## Installation
+
+Even though it's intended to be used with Orquestra, `orquestra-qiskit` can be also used as a Python module.
+Just run `pip install .` from the main directory.
+
+## Usage
 
 `orquestra-qiskit` is a Python module that exposes Qiskit's simulators as an [`orquestra`](https://github.com/zapatacomputing/orquestra-quantum/blob/main/src/orquestra/quantum/api/backend.py) `QuantumSimulator`. It can be imported with:
 
@@ -29,4 +34,4 @@ For more information regarding Orquestra and resources, please refer to the [Orq
 
 ## Development and contribution
 
-You can find the development guidelines in the [`z-quantum-core` repository](https://github.com/zapatacomputing/z-quantum-core).
+You can find the development guidelines in the [`orquestra-quantum` repository](https://github.com/zapatacomputing/orquestra-quantum).

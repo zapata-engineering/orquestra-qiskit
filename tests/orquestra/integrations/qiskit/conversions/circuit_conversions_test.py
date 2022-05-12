@@ -31,8 +31,8 @@ EQUIVALENT_NON_PARAMETRIC_GATES = [
 ]
 
 EQUIVALENT_PARAMETRIC_GATES = [
-    (zquantum_cls(theta), qiskit_cls(theta))
-    for zquantum_cls, qiskit_cls in [
+    (orquestra_cls(theta), qiskit_cls(theta))
+    for orquestra_cls, qiskit_cls in [
         (_builtin_gates.RX, qiskit.circuit.library.RXGate),
         (_builtin_gates.RY, qiskit.circuit.library.RYGate),
         (_builtin_gates.RZ, qiskit.circuit.library.RZGate),
@@ -57,7 +57,7 @@ TWO_QUBIT_SWAP_MATRIX = np.array(
 
 
 def _fix_qubit_ordering(qiskit_matrix):
-    """Import qiskit matrix to ZQuantum matrix convention.
+    """Import qiskit matrix to Orquestra matrix convention.
 
     Qiskit uses different qubit ordering than we do.
     It causes multi-qubit matrices to look different on first sight."""
@@ -71,16 +71,16 @@ def _fix_qubit_ordering(qiskit_matrix):
 
 class TestGateConversion:
     @pytest.mark.parametrize(
-        "zquantum_gate,qiskit_gate",
+        "orquestra_gate,qiskit_gate",
         [
             *EQUIVALENT_NON_PARAMETRIC_GATES,
             *EQUIVALENT_PARAMETRIC_GATES,
         ],
     )
-    def test_matrices_are_equal(self, zquantum_gate, qiskit_gate):
-        zquantum_matrix = np.array(zquantum_gate.matrix).astype(np.complex128)
+    def test_matrices_are_equal(self, orquestra_gate, qiskit_gate):
+        orquestra_matrix = np.array(orquestra_gate.matrix).astype(np.complex128)
         qiskit_matrix = _fix_qubit_ordering(qiskit_gate.to_matrix())
-        np.testing.assert_allclose(zquantum_matrix, qiskit_matrix)
+        np.testing.assert_allclose(orquestra_matrix, qiskit_matrix)
 
 
 class TestU3GateConversion:
@@ -95,12 +95,12 @@ class TestU3GateConversion:
         ],
     )
     def test_matrices_are_equal_up_to_phase_factor(self, theta, phi, lambda_):
-        zquantum_matrix = np.array(
+        orquestra_matrix = np.array(
             _builtin_gates.U3(theta, phi, lambda_).matrix
         ).astype(np.complex128)
         qiskit_matrix = qiskit.extensions.U3Gate(theta, phi, lambda_).to_matrix()
 
-        np.testing.assert_allclose(zquantum_matrix, qiskit_matrix, atol=1e-7)
+        np.testing.assert_allclose(orquestra_matrix, qiskit_matrix, atol=1e-7)
 
 
 class TestCU3GateConversion:
@@ -115,25 +115,25 @@ class TestCU3GateConversion:
         ],
     )
     def test_matrices_are_equal_up_to_phase_factor(self, theta, phi, lambda_):
-        zquantum_matrix = np.array(
+        orquestra_matrix = np.array(
             _builtin_gates.U3(theta, phi, lambda_).controlled(1)(0, 1).lifted_matrix(2)
         ).astype(np.complex128)
         qiskit_matrix = (
             qiskit.extensions.U3Gate(theta, phi, lambda_).control(1).to_matrix()
         )
 
-        # Rearrange the qiskit matrix, such that it matches the endianness of z-quantum
+        # Rearrange the qiskit matrix, such that it matches the endianness of orquestra
         qiskit_matrix_reversed_control = _fix_qubit_ordering(qiskit_matrix)
 
         np.testing.assert_allclose(
-            zquantum_matrix, qiskit_matrix_reversed_control, atol=1e-7
+            orquestra_matrix, qiskit_matrix_reversed_control, atol=1e-7
         )
 
 
 # --------- circuits ---------
 
 # NOTE: In Qiskit, 0 is the most significant qubit,
-# whereas in ZQuantum, 0 is the least significant qubit.
+# whereas in Orquestra, 0 is the least significant qubit.
 # This is we need to flip the indices.
 #
 # See more at
@@ -447,37 +447,40 @@ def _draw_qiskit_circuit(circuit):
 
 class TestExportingToQiskit:
     @pytest.mark.parametrize(
-        "zquantum_circuit, qiskit_circuit", EQUIVALENT_NON_PARAMETRIZED_CIRCUITS
+        "orquestra_circuit, qiskit_circuit", EQUIVALENT_NON_PARAMETRIZED_CIRCUITS
     )
     def test_exporting_circuit_gives_equivalent_circuit(
-        self, zquantum_circuit, qiskit_circuit
+        self, orquestra_circuit, qiskit_circuit
     ):
-        converted = export_to_qiskit(zquantum_circuit)
+        converted = export_to_qiskit(orquestra_circuit)
         assert converted == qiskit_circuit, (
             f"Converted circuit:\n{_draw_qiskit_circuit(converted)}\n isn't equal "
             f"to\n{_draw_qiskit_circuit(qiskit_circuit)}"
         )
 
     @pytest.mark.parametrize(
-        "zquantum_circuit",
-        [zquantum_circuit for zquantum_circuit, _ in EQUIVALENT_PARAMETRIZED_CIRCUITS],
+        "orquestra_circuit",
+        [
+            orquestra_circuit
+            for orquestra_circuit, _ in EQUIVALENT_PARAMETRIZED_CIRCUITS
+        ],
     )
     def test_exporting_parametrized_circuit_doesnt_change_symbol_names(
-        self, zquantum_circuit
+        self, orquestra_circuit
     ):
-        converted = export_to_qiskit(zquantum_circuit)
+        converted = export_to_qiskit(orquestra_circuit)
         converted_names = sorted(map(str, converted.parameters))
-        initial_names = sorted(map(str, zquantum_circuit.free_symbols))
+        initial_names = sorted(map(str, orquestra_circuit.free_symbols))
         assert converted_names == initial_names
 
     @pytest.mark.parametrize(
-        "zquantum_circuit, qiskit_circuit", EQUIVALENT_PARAMETRIZED_CIRCUITS
+        "orquestra_circuit, qiskit_circuit", EQUIVALENT_PARAMETRIZED_CIRCUITS
     )
     def test_exporting_and_binding_parametrized_circuit_results_in_equivalent_circuit(
-        self, zquantum_circuit, qiskit_circuit
+        self, orquestra_circuit, qiskit_circuit
     ):
         # 1. Export
-        converted = export_to_qiskit(zquantum_circuit)
+        converted = export_to_qiskit(orquestra_circuit)
         # 2. Bind params
         converted_bound = converted.bind_parameters(
             {param: EXAMPLE_PARAM_VALUES[str(param)] for param in converted.parameters}
@@ -496,16 +499,16 @@ class TestExportingToQiskit:
         )
 
     @pytest.mark.parametrize(
-        "zquantum_circuit, qiskit_circuit", EQUIVALENT_PARAMETRIZED_CIRCUITS
+        "orquestra_circuit, qiskit_circuit", EQUIVALENT_PARAMETRIZED_CIRCUITS
     )
     def test_binding_and_exporting_parametrized_circuit_results_in_equivalent_circuit(
-        self, zquantum_circuit, qiskit_circuit
+        self, orquestra_circuit, qiskit_circuit
     ):
         # 1. Bind params
-        bound = zquantum_circuit.bind(
+        bound = orquestra_circuit.bind(
             {
                 symbol: EXAMPLE_PARAM_VALUES[str(symbol)]
-                for symbol in zquantum_circuit.free_symbols
+                for symbol in orquestra_circuit.free_symbols
             }
         )
         # 2. Export
@@ -525,21 +528,21 @@ class TestExportingToQiskit:
 
     def test_converting_circuit_with_daggers_fails_explicitly(self):
         # NOTE: Qiskit doesn't natively support dagger gates
-        zquantum_circuit = _circuit.Circuit(
+        orquestra_circuit = _circuit.Circuit(
             [_builtin_gates.X.dagger(2), _builtin_gates.T.dagger(1)], 3
         )
         with pytest.raises(NotImplementedError):
-            export_to_qiskit(zquantum_circuit)
+            export_to_qiskit(orquestra_circuit)
 
     @pytest.mark.parametrize(
-        "zquantum_circuit, qiskit_circuit", EQUIVALENT_CUSTOM_GATE_CIRCUITS
+        "orquestra_circuit, qiskit_circuit", EQUIVALENT_CUSTOM_GATE_CIRCUITS
     )
     def test_exporting_circuit_with_custom_gates_gives_equivalent_operator(
-        self, zquantum_circuit, qiskit_circuit
+        self, orquestra_circuit, qiskit_circuit
     ):
-        exported = export_to_qiskit(zquantum_circuit)
+        exported = export_to_qiskit(orquestra_circuit)
         # We can't compare the circuits directly, because the gate names can differ.
-        # Qiskit allows multiple gate operations with the same label. ZQuantum doesn't
+        # Qiskit allows multiple gate operations with the same label. Orquestra doesn't
         # allow that, so we append a matrix hash to the name.
         assert qiskit.quantum_info.Operator(exported) == qiskit.quantum_info.Operator(
             qiskit_circuit
@@ -548,13 +551,13 @@ class TestExportingToQiskit:
 
 class TestImportingFromQiskit:
     @pytest.mark.parametrize(
-        "zquantum_circuit, qiskit_circuit", EQUIVALENT_NON_PARAMETRIZED_CIRCUITS
+        "orquestra_circuit, qiskit_circuit", EQUIVALENT_NON_PARAMETRIZED_CIRCUITS
     )
     def test_importing_circuit_gives_equivalent_circuit(
-        self, zquantum_circuit, qiskit_circuit
+        self, orquestra_circuit, qiskit_circuit
     ):
         imported = import_from_qiskit(qiskit_circuit)
-        assert imported == zquantum_circuit
+        assert imported == orquestra_circuit
 
     @pytest.mark.parametrize(
         "qiskit_circuit",
@@ -569,10 +572,10 @@ class TestImportingFromQiskit:
         )
 
     @pytest.mark.parametrize(
-        "zquantum_circuit, qiskit_circuit", EQUIVALENT_PARAMETRIZED_CIRCUITS
+        "orquestra_circuit, qiskit_circuit", EQUIVALENT_PARAMETRIZED_CIRCUITS
     )
     def test_importing_and_binding_parametrized_circuit_results_in_equivalent_circuit(
-        self, zquantum_circuit, qiskit_circuit
+        self, orquestra_circuit, qiskit_circuit
     ):
         # 1. Import
         imported = import_from_qiskit(qiskit_circuit)
@@ -584,15 +587,15 @@ class TestImportingFromQiskit:
         imported_bound = imported.bind(symbols_map)
 
         # 3. Bind the ref
-        ref_bound = zquantum_circuit.bind(symbols_map)
+        ref_bound = orquestra_circuit.bind(symbols_map)
 
         assert imported_bound == ref_bound
 
     @pytest.mark.parametrize(
-        "zquantum_circuit, qiskit_circuit", EQUIVALENT_PARAMETRIZED_CIRCUITS
+        "orquestra_circuit, qiskit_circuit", EQUIVALENT_PARAMETRIZED_CIRCUITS
     )
     def test_binding_and_importing_parametrized_circuit_results_in_equivalent_circuit(
-        self, zquantum_circuit, qiskit_circuit
+        self, orquestra_circuit, qiskit_circuit
     ):
         # 1. Bind params
         bound = qiskit_circuit.bind_parameters(
@@ -605,22 +608,22 @@ class TestImportingFromQiskit:
         bound_imported = import_from_qiskit(bound)
 
         # 3. Bind the ref
-        ref_bound = zquantum_circuit.bind(
+        ref_bound = orquestra_circuit.bind(
             {
                 symbol: EXAMPLE_PARAM_VALUES[str(symbol)]
-                for symbol in zquantum_circuit.free_symbols
+                for symbol in orquestra_circuit.free_symbols
             }
         )
         assert bound_imported == ref_bound
 
     @pytest.mark.parametrize(
-        "zquantum_circuit, qiskit_circuit", EQUIVALENT_CUSTOM_GATE_CIRCUITS
+        "orquestra_circuit, qiskit_circuit", EQUIVALENT_CUSTOM_GATE_CIRCUITS
     )
     def test_importing_circuit_with_custom_gates_gives_equivalent_circuit(
-        self, zquantum_circuit, qiskit_circuit
+        self, orquestra_circuit, qiskit_circuit
     ):
         imported = import_from_qiskit(qiskit_circuit)
-        assert imported == zquantum_circuit
+        assert imported == orquestra_circuit
 
     @pytest.mark.parametrize("unsupported_circuit", UNSUPPORTED_CIRCUITS)
     def test_operation_not_implemented(self, unsupported_circuit):
