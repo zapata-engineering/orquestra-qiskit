@@ -34,19 +34,7 @@ jobs:
         with:
           repository: zapatacomputing/orquestra-quantum
           path: orquestra-quantum
-          ssh-key: ${{ secrets.SSH_PRIVATE_KEY }}
-
-      # ------------------------------------------------------------------------
-      # Loads private SSH key to the SSH agent. Allows to install dependencies
-      # from private git repos, but requires setting `secrets.SSH_PRIVATE_KEY`
-      # in repo settings.
-      # ------------------------------------------------------------------------
-      # - uses: ./subtrees/z_quantum_actions/actions/ssh_setup
-      #   with:
-      #     ssh_key: ${{ secrets.SSH_PRIVATE_KEY }}
 
       - uses: ./subtrees/z_quantum_actions/actions/coverage
-        with:
-          codecov_secret: ${{ secrets.CODECOV_TOKEN }}
         env:
           ZAPATA_IBMQ_API_TOKEN: ${{ secrets.ZAPATA_IBMQ_API_TOKEN }}
