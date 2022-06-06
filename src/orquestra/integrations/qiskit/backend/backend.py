@@ -380,7 +380,7 @@ class QiskitBackend(QuantumBackend):
             active_qubits.sort()
             for key in deepcopy(list(counts.keys())):
                 new_key = "".join(key[i] for i in active_qubits)
-                counts[new_key] = counts.get(new_key, 0) + counts.pop(key)
+                counts[new_key] = counts.pop(key) + counts.get(new_key, 0)
 
         if not self.readout_correction_filters.get(str(active_qubits)):
 
