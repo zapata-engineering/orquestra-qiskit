@@ -181,7 +181,7 @@ class TestQiskitSimulator(QuantumSimulatorTests):
         noise_model, connectivity = get_qiskit_noise_model(
             "ibmq_santiago", api_token=os.getenv("ZAPATA_IBMQ_API_TOKEN")
         )
-        n_samples = 8192
+        n_samples = 20000
         simulator = QiskitSimulator(
             "aer_simulator",
             noise_model=noise_model,
@@ -193,8 +193,7 @@ class TestQiskitSimulator(QuantumSimulatorTests):
         circuit = Circuit([X(0)])
         # Flip qubit an even number of times to remain in the |1> state, but allow
         # decoherence to take effect
-        circuit += Circuit([X(0) for i in range(50)])
-
+        circuit += Circuit([X(0) for i in range(200)])
         # When
         estimation_tasks = [EstimationTask(qubit_operator, circuit, n_samples)]
 
