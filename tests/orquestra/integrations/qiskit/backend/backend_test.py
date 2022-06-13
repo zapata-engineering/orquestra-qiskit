@@ -3,6 +3,7 @@
 ################################################################################
 import math
 import os
+import pickle
 from copy import deepcopy
 
 import pytest
@@ -133,6 +134,24 @@ class TestQiskitBackend(QuantumBackendTests):
             * 10
         )
         assert len(measurements_set) == 2
+
+    def test_aggregate_measurements_extract_correct_qubits(
+        self, backend_with_readout_correction
+    ):
+        # Given
+        pickling_off = open("jobs_and_batches_with_different_qubits.pickle", "rb")
+        jobs = pickle.load(pickling_off)
+        batches = pickle.load(pickling_off)
+        pickling_off.close()
+        multiplicities = [1]
+
+        # When
+        results = backend_with_readout_correction.aggregate_measurements(
+            jobs, batches, multiplicities
+        )
+
+        # Then
+        assert results[0].get_counts() == {"11": 50}
 
     def test_run_circuitset_and_measure(self, backend):
         # Given
@@ -287,32 +306,34 @@ class TestQiskitBackend(QuantumBackendTests):
             assert max(counts, key=counts.get) == "11"
 
     @pytest.mark.parametrize(
-        "counts, active_qubits",
+        "counts, v2p_layout_active",
         [
-            ({"100000000000000000001": 10}, [0, 20]),
-            ({"100000000000000000100": 10}, [0, 18, 20]),
-            ({"001000000000000000001": 10}, [2, 20]),
+            ({"100000000000000000001": 10}, {0: 0, 20: 20}),
+            ({"100000000000000000100": 10}, {0: 0, 18: 18, 20: 20}),
+            ({"001000000000000000001": 10}, {2: 2, 20: 20}),
+            ({"101": 10}, {0: 0, 2: 1}),
         ],
     )
     def test_subset_readout_correction(
-        self, counts, active_qubits, backend_with_readout_correction
+        self, counts, v2p_layout_active, backend_with_readout_correction
     ):
         # Given
         copied_counts = deepcopy(counts)
+        physical_qubits = list(v2p_layout_active.values())
 
         # When
         mitigated_counts = backend_with_readout_correction._apply_readout_correction(
-            copied_counts, active_qubits
+            copied_counts, v2p_layout_active
         )
 
         # Then
         assert backend_with_readout_correction.readout_correction
         assert backend_with_readout_correction.readout_correction_filters.get(
-            str(active_qubits)
+            str(physical_qubits)
         )
         assert copied_counts == pytest.approx(mitigated_counts, 10e-5)
 
-    def test_subset_readout_correction_with_unspecified_active_qubits(
+    def test_subset_readout_correction_with_unspecified_v2p_layout(
         self, backend_with_readout_correction
     ):
         # Given
@@ -334,37 +355,39 @@ class TestQiskitBackend(QuantumBackendTests):
         self, backend_with_readout_correction
     ):
         # Given
-        counts, active_qubits = ({"11": 10}, None)
+        counts, v2p_layout = ({"11": 10}, None)
         backend_with_readout_correction.n_samples_for_readout_calibration = None
 
         # When/Then
         with pytest.raises(TypeError):
             backend_with_readout_correction._apply_readout_correction(
-                counts, active_qubits
+                counts, v2p_layout
             )
 
-    def test_subset_readout_correction_for_multiple_subsets(
+    def test_subset_readout_correction_for_different_subsets_simultaneously(
         self, backend_with_readout_correction
     ):
         # Given
-        counts_1, active_qubits_1 = ({"100000000000000000001": 10}, [0, 20])
-        counts_2, active_qubits_2 = ({"001000000000000000001": 10}, [2, 20])
+        counts_1, v2p_layout_1 = ({"100000000000000000001": 10}, {0: 0, 20: 20})
+        counts_2, v2p_layout_2 = ({"001000000000000000001": 10}, {2: 2, 20: 20})
+        physical_qubits_1 = list(v2p_layout_1.values())
+        physical_qubits_2 = list(v2p_layout_2.values())
 
         # When
         mitigated_counts_1 = backend_with_readout_correction._apply_readout_correction(
-            counts_1, active_qubits_1
+            counts_1, v2p_layout_1
         )
         mitigated_counts_2 = backend_with_readout_correction._apply_readout_correction(
-            counts_2, active_qubits_2
+            counts_2, v2p_layout_2
         )
 
         # Then
         assert backend_with_readout_correction.readout_correction
         assert backend_with_readout_correction.readout_correction_filters.get(
-            str(active_qubits_1)
+            str(physical_qubits_1)
         )
         assert backend_with_readout_correction.readout_correction_filters.get(
-            str(active_qubits_2)
+            str(physical_qubits_2)
         )
         assert counts_1 == pytest.approx(mitigated_counts_1, 10e-5)
         assert counts_2 == pytest.approx(mitigated_counts_2, 10e-5)

@@ -4,13 +4,12 @@
 import math
 import time
 from copy import deepcopy
-from typing import Dict, List, Optional, Sequence, Tuple
+from typing import Dict, List, Optional, Sequence, Set, Tuple
 
 from orquestra.quantum.api.backend import QuantumBackend
 from orquestra.quantum.circuits import Circuit
 from orquestra.quantum.measurements import Measurements
 from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister, execute
-from qiskit.circuit.gate import Gate as QiskitGate
 from qiskit.ignis.mitigation.measurement import (
     CompleteMeasFitter,
     MeasurementFilter,
@@ -72,8 +71,10 @@ class QiskitBackend(QuantumBackend):
             try:
                 IBMQ.enable_account(api_token)
             except IBMQAccountError as e:
-                if e.message != (
-                    "An IBM Quantum Experience account is already in use for the session."  # noqa: E501
+                if (
+                    e.message
+                    != "An IBM Quantum Experience account is already in use for the"
+                    " session."
                 ):
                     raise RuntimeError(e)
 
@@ -301,11 +302,13 @@ class QiskitBackend(QuantumBackend):
             corresponds to one of the circuits of the original (unexpanded)
             circuit set.
         """
-        circuit_set = []
+        circuit_set_from_jobs = []  # circuits that qiskit ran
+        circuit_set_from_batches = []  # circuits that users sent
         circuit_counts_set = []
         for job, batch in zip(jobs, batches):
+            circuit_set_from_jobs.extend(job.circuits())
+            circuit_set_from_batches.extend(batch)
             for experiment in batch:
-                circuit_set.append(experiment)
                 circuit_counts_set.append(job.result().get_counts(experiment))
 
         measurements_set = []
@@ -320,17 +323,15 @@ class QiskitBackend(QuantumBackend):
                 circuit_index += 1
 
             if self.readout_correction:
-                current_circuit = circuit_set[circuit_index - 1]
-                active_qubits = list(
-                    {
-                        qubit.index
-                        for inst in current_circuit.data
-                        if isinstance(inst[0], QiskitGate)
-                        for qubit in inst[1]
-                    }
+                current_circuit_from_jobs = circuit_set_from_jobs[circuit_index - 1]
+                current_circuit_from_batches = circuit_set_from_batches[
+                    circuit_index - 1
+                ]
+                v2p_layout_active = get_v2p_layout(
+                    current_circuit_from_batches, current_circuit_from_jobs
                 )
                 combined_counts = self._apply_readout_correction(
-                    combined_counts, active_qubits
+                    combined_counts, v2p_layout_active
                 )
 
             # qiskit counts object maps bitstrings in reversed order to ints, so we must
@@ -345,21 +346,20 @@ class QiskitBackend(QuantumBackend):
         return measurements_set
 
     def _apply_readout_correction(
-        self,
-        counts: Counts,
-        active_qubits: Optional[List[int]] = None,
+        self, counts: Counts, v2p_layout_active: Optional[Dict[int, int]] = None
     ):
         """Returns the counts from an experiment with readout correction applied to a
-        set of qubits labeled active_qubits. Output counts will only show outputs for
-        corrected qubits. If no filter exists for the current active, qubits the
+        set of qubits labeled physical_qubits. Output counts will only show outputs for
+        corrected qubits. If no filter exists for the current physical_qubits the
         function will make one. Otherwise, function will re-use filter it created
-        for these active qubits previously. Has 8 digits of precision.
+        for these physical_qubits previously. Has 8 digits of precision.
 
         Args:
             counts (Counts): Dictionary containing the number of times a bitstring
                 was received in an experiment.
-            active_qubits (Optional[List[int]], optional): Qubits for perform readout
-                correction on. Defaults to readout correction on all qubits.
+            v2p_layout_active (Optional[Dict[int, int]], optional): a dictionary that
+                when given a virtual qubit returns the corresponding physical qubit.
+                Defaults to readout correction on all qubits.
 
         Raises:
             TypeError: If n_samples_for_readout_correction was not defined when the
@@ -374,15 +374,19 @@ class QiskitBackend(QuantumBackend):
             num_qubits = len(key)
             break
 
-        if active_qubits is None:
-            active_qubits = list(range(num_qubits))
+        if v2p_layout_active is None:
+            virtual_qubits = list(range(num_qubits))
+            physical_qubits = list(range(num_qubits))
         else:
-            active_qubits.sort()
+            virtual_qubits = list(v2p_layout_active.keys())
+            physical_qubits = list(v2p_layout_active.values())
+            virtual_qubits.sort()
+            physical_qubits.sort()
             for key in deepcopy(list(counts.keys())):
-                new_key = "".join(key[i] for i in active_qubits)
+                new_key = "".join(key[num_qubits - i - 1] for i in virtual_qubits)
                 counts[new_key] = counts.pop(key) + counts.get(new_key, 0)
 
-        if not self.readout_correction_filters.get(str(active_qubits)):
+        if not self.readout_correction_filters.get(str(physical_qubits)):
 
             if self.n_samples_for_readout_calibration is None:
                 raise TypeError(
@@ -391,7 +395,9 @@ class QiskitBackend(QuantumBackend):
                 )
 
             qr = QuantumRegister(num_qubits)
-            meas_cals, state_labels = complete_meas_cal(qubit_list=active_qubits, qr=qr)
+            meas_cals, state_labels = complete_meas_cal(
+                qubit_list=physical_qubits, qr=qr
+            )
 
             # Execute the calibration circuits
             job = self.execute_with_retries(
@@ -403,12 +409,139 @@ class QiskitBackend(QuantumBackend):
             meas_fitter = CompleteMeasFitter(cal_results, state_labels)
 
             # Create a measurement filter from the calibration matrix
-            self.readout_correction_filters[str(active_qubits)] = meas_fitter.filter
+            self.readout_correction_filters[str(physical_qubits)] = meas_fitter.filter
 
-        this_filter = self.readout_correction_filters[str(active_qubits)]
+        this_filter = self.readout_correction_filters[str(physical_qubits)]
         mitigated_counts = this_filter.apply(counts, method=self.noise_inversion_method)
         # round to make up for precision loss from pseudoinverses used to invert noise
         rounded_mitigated_counts = {
             k: round(v, 8) for k, v in mitigated_counts.items() if round(v, 8) != 0
         }
         return rounded_mitigated_counts
+
+
+def get_active_qubits(circuit: QuantumCircuit) -> Set[int]:
+    """Returns a list of qubits that qiskit gates are operating on (i.e., active qubits).
+
+    Args:
+        circuit (QuantumCircuit): a circuit that we want to find the active qubits for.
+
+    Returns:
+        active_qubits (Set[int]): a list of active qubits.
+    """
+    qreg_size = sum(len(qreg) for qreg in circuit.qregs)
+    active_qubits: Set = set()
+
+    for inst in circuit.data:
+        if inst[0].name not in [
+            "measure",
+            "barrier",
+        ]:  # if not measure/barrier, then it is a Quantum Gate
+            active_qubits = active_qubits.union({q.index for q in inst[1]})
+            if len(active_qubits) == qreg_size:
+                break
+
+    return active_qubits
+
+
+def get_clbit_qubit_map(circuit: QuantumCircuit) -> List[int]:
+    """Returns a list of qubits where
+        their indices are the corresponding classical bits.
+
+    Args:
+        circuit (QuantumCircuit): a circuit for which
+            we want to find the clbit-to-qubit map.
+
+    Raises:
+        ValueError: If the QuantumCircuit has more than 1 ClassicalRegister.
+        AssertionError: If the number of measure operations
+            is less than the number of classical bits.
+
+    Returns:
+        clbit_qubit_map (List[int]): a list of qubits
+            whose indices correspond to their classical bits.
+    """
+    cregs_list = circuit.cregs
+
+    num_cregs = len(cregs_list)
+    if num_cregs > 1:
+        raise ValueError(
+            f"QuantumCircuit has {num_cregs} ClassicalRegister."
+            "Currently, QuantumCircuit with only 1 ClassicalRegister is supported."
+        )
+
+    creg_size = cregs_list[0].size  # potential number of measured qubits
+
+    clbit_qubit_map = [-1] * creg_size
+
+    measure_op_found = 0
+
+    """Each item in QuantumCircuit.data is a tuple:
+        (<instuction name@idx=0>, <quantum register@idx=1>, <classcical register@idx=2>)
+    """
+    inst_idx = 0
+    qreg_idx = 1
+    creg_idx = 2
+
+    """The following for loop gets the `instructions` of a QuantumCircuit from
+    reverese (as `measure` instructions are usually at the end of a QuantumCircuit).
+    The loop breaks when all the `measure` instructions are found.
+    """
+    for inst in circuit.data[::-1]:
+        if inst[inst_idx].name == "measure":
+            measure_op_found += 1
+
+            qubit = inst[qreg_idx][0].index  # can be physical qubit or virtual qubit
+            clbit = inst[creg_idx][0].index
+
+            clbit_qubit_map[clbit] = qubit
+
+            if measure_op_found == creg_size:
+                break
+
+    assert measure_op_found == creg_size, (
+        f"measured op found {measure_op_found} is less than ClassicalRegister size"
+        f" {creg_size}"
+    )
+
+    return clbit_qubit_map
+
+
+def get_v2p_layout(
+    orig_circuit: QuantumCircuit, transpiled_circuit: QuantumCircuit
+) -> Dict[int, int]:
+    """Returns a dictionary that
+        when given an active qubit from the original circuit (i.e., a virtual qubit),
+        returns an active qubit from the transpiled circuit (i.e., a physical qubit).
+
+    Args:
+        orig_circuit (QuantumCircuit): a circuit that
+            we submitted to qiskit and from which we get our virtual qubits.
+        transpiled_circuit (QuantumCircuit): a circuit that
+            qiskit ran and from which we get our physical qubits.
+
+    Raises:
+        AssertionError: If the number of virtual qubits
+            is not equal to the number of physical qubits.
+
+    Returns:
+        v2p_layout_active (Dict[int, int]): a dictionary that
+            when given a virtual qubit returns the corresponding physical qubit.
+    """
+    active_virtual_qubits = get_active_qubits(orig_circuit)
+    clbits_to_virtual_qubits = get_clbit_qubit_map(orig_circuit)
+    clbits_to_physical_qubits = get_clbit_qubit_map(transpiled_circuit)
+
+    assert len(clbits_to_virtual_qubits) == len(clbits_to_physical_qubits)
+
+    v2p_layout_all = {
+        c2v: c2p
+        for c2v, c2p in zip(clbits_to_virtual_qubits, clbits_to_physical_qubits)
+    }
+    v2p_layout_active = {
+        virtual: physical
+        for virtual, physical in v2p_layout_all.items()
+        if virtual in active_virtual_qubits
+    }
+
+    return v2p_layout_active
