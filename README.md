@@ -28,7 +28,7 @@ from orquestra.integrations.qiskit.backend import QiskitBackend
 In addition, it also provides converters that allow switching between `qiskit` circuits and those of `orquestra`.
 
 The module can be used directly in Python or in an [Orquestra](https://www.orquestra.io) workflow.
-For more details, see the [Orquestra Qiskit integration docs](http://docs.orquestra.io/other-resources/framework-integrations/qiskit/).
+For more details, see the [Orquestra Core docs](https://zapatacomputing.github.io/orquestra-core/index.html).
 
 For more information regarding Orquestra and resources, please refer to the [Orquestra documentation](https://www.orquestra.io/docs).
 
