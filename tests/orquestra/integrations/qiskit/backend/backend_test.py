@@ -139,10 +139,12 @@ class TestQiskitBackend(QuantumBackendTests):
         self, backend_with_readout_correction
     ):
         # Given
-        pickling_off = open("jobs_and_batches_with_different_qubits.pickle", "rb")
-        jobs = pickle.load(pickling_off)
-        batches = pickle.load(pickling_off)
-        pickling_off.close()
+        extract_pickle_objects = open(
+            "jobs_and_batches_with_different_qubits.pickle", "rb"
+        )
+        jobs = pickle.load(extract_pickle_objects)
+        batches = pickle.load(extract_pickle_objects)
+        extract_pickle_objects.close()
         multiplicities = [1]
 
         # When
@@ -306,7 +308,7 @@ class TestQiskitBackend(QuantumBackendTests):
             assert max(counts, key=counts.get) == "11"
 
     @pytest.mark.parametrize(
-        "counts, v2p_layout_active",
+        "counts, virtual_to_physical_qubits_dict",
         [
             ({"100000000000000000001": 10}, {0: 0, 20: 20}),
             ({"100000000000000000100": 10}, {0: 0, 18: 18, 20: 20}),
@@ -315,15 +317,18 @@ class TestQiskitBackend(QuantumBackendTests):
         ],
     )
     def test_subset_readout_correction(
-        self, counts, v2p_layout_active, backend_with_readout_correction
+        self,
+        counts,
+        virtual_to_physical_qubits_dict,
+        backend_with_readout_correction,
     ):
         # Given
         copied_counts = deepcopy(counts)
-        physical_qubits = list(v2p_layout_active.values())
+        physical_qubits = list(virtual_to_physical_qubits_dict.values())
 
         # When
         mitigated_counts = backend_with_readout_correction._apply_readout_correction(
-            copied_counts, v2p_layout_active
+            copied_counts, virtual_to_physical_qubits_dict
         )
 
         # Then
@@ -333,7 +338,7 @@ class TestQiskitBackend(QuantumBackendTests):
         )
         assert copied_counts == pytest.approx(mitigated_counts, 10e-5)
 
-    def test_subset_readout_correction_with_unspecified_v2p_layout(
+    def test_subset_readout_correction_with_unspecified_virtual_to_physical_qubits_dict(
         self, backend_with_readout_correction
     ):
         # Given
@@ -355,30 +360,36 @@ class TestQiskitBackend(QuantumBackendTests):
         self, backend_with_readout_correction
     ):
         # Given
-        counts, v2p_layout = ({"11": 10}, None)
+        counts, virtual_to_physical_qubits_dict = ({"11": 10}, None)
         backend_with_readout_correction.n_samples_for_readout_calibration = None
 
         # When/Then
         with pytest.raises(TypeError):
             backend_with_readout_correction._apply_readout_correction(
-                counts, v2p_layout
+                counts, virtual_to_physical_qubits_dict
             )
 
     def test_subset_readout_correction_for_different_subsets_simultaneously(
         self, backend_with_readout_correction
     ):
         # Given
-        counts_1, v2p_layout_1 = ({"100000000000000000001": 10}, {0: 0, 20: 20})
-        counts_2, v2p_layout_2 = ({"001000000000000000001": 10}, {2: 2, 20: 20})
-        physical_qubits_1 = list(v2p_layout_1.values())
-        physical_qubits_2 = list(v2p_layout_2.values())
+        counts_1, virtual_to_physical_qubits_dict_1 = (
+            {"100000000000000000001": 10},
+            {0: 0, 20: 20},
+        )
+        counts_2, virtual_to_physical_qubits_dict_2 = (
+            {"001000000000000000001": 10},
+            {2: 2, 20: 20},
+        )
+        physical_qubits_1 = list(virtual_to_physical_qubits_dict_1.values())
+        physical_qubits_2 = list(virtual_to_physical_qubits_dict_2.values())
 
         # When
         mitigated_counts_1 = backend_with_readout_correction._apply_readout_correction(
-            counts_1, v2p_layout_1
+            counts_1, virtual_to_physical_qubits_dict_1
         )
         mitigated_counts_2 = backend_with_readout_correction._apply_readout_correction(
-            counts_2, v2p_layout_2
+            counts_2, virtual_to_physical_qubits_dict_2
         )
 
         # Then

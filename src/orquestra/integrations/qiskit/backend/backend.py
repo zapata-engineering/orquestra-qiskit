@@ -327,11 +327,11 @@ class QiskitBackend(QuantumBackend):
                 current_circuit_from_batches = circuit_set_from_batches[
                     circuit_index - 1
                 ]
-                v2p_layout_active = get_v2p_layout(
+                virtual_to_physical_qubits_dict = _get_virtual_to_physical_qubits_dict(
                     current_circuit_from_batches, current_circuit_from_jobs
                 )
                 combined_counts = self._apply_readout_correction(
-                    combined_counts, v2p_layout_active
+                    combined_counts, virtual_to_physical_qubits_dict
                 )
 
             # qiskit counts object maps bitstrings in reversed order to ints, so we must
@@ -346,7 +346,9 @@ class QiskitBackend(QuantumBackend):
         return measurements_set
 
     def _apply_readout_correction(
-        self, counts: Counts, v2p_layout_active: Optional[Dict[int, int]] = None
+        self,
+        counts: Counts,
+        virtual_to_physical_qubits_dict: Optional[Dict[int, int]] = None,
     ):
         """Returns the counts from an experiment with readout correction applied to a
         set of qubits labeled physical_qubits. Output counts will only show outputs for
@@ -357,8 +359,9 @@ class QiskitBackend(QuantumBackend):
         Args:
             counts (Counts): Dictionary containing the number of times a bitstring
                 was received in an experiment.
-            v2p_layout_active (Optional[Dict[int, int]], optional): a dictionary that
-                when given a virtual qubit returns the corresponding physical qubit.
+            virtual_to_physical_qubits_dict (Optional[Dict[int, int]], optional):
+                a dictionary that when given a virtual qubit,
+                returns the corresponding physical qubit.
                 Defaults to readout correction on all qubits.
 
         Raises:
@@ -374,12 +377,12 @@ class QiskitBackend(QuantumBackend):
             num_qubits = len(key)
             break
 
-        if v2p_layout_active is None:
+        if virtual_to_physical_qubits_dict is None:
             virtual_qubits = list(range(num_qubits))
             physical_qubits = list(range(num_qubits))
         else:
-            virtual_qubits = list(v2p_layout_active.keys())
-            physical_qubits = list(v2p_layout_active.values())
+            virtual_qubits = list(virtual_to_physical_qubits_dict.keys())
+            physical_qubits = list(virtual_to_physical_qubits_dict.values())
             virtual_qubits.sort()
             physical_qubits.sort()
             for key in deepcopy(list(counts.keys())):
@@ -420,7 +423,7 @@ class QiskitBackend(QuantumBackend):
         return rounded_mitigated_counts
 
 
-def get_active_qubits(circuit: QuantumCircuit) -> Set[int]:
+def _get_active_qubits(circuit: QuantumCircuit) -> Set[int]:
     """Returns a list of qubits that qiskit gates are operating on (i.e., active qubits).
 
     Args:
@@ -444,7 +447,7 @@ def get_active_qubits(circuit: QuantumCircuit) -> Set[int]:
     return active_qubits
 
 
-def get_clbit_qubit_map(circuit: QuantumCircuit) -> List[int]:
+def _get_clbit_qubit_map(circuit: QuantumCircuit) -> List[int]:
     """Returns a list of qubits where
         their indices are the corresponding classical bits.
 
@@ -507,15 +510,15 @@ def get_clbit_qubit_map(circuit: QuantumCircuit) -> List[int]:
     return clbit_qubit_map
 
 
-def get_v2p_layout(
-    orig_circuit: QuantumCircuit, transpiled_circuit: QuantumCircuit
+def _get_virtual_to_physical_qubits_dict(
+    original_circuit: QuantumCircuit, transpiled_circuit: QuantumCircuit
 ) -> Dict[int, int]:
     """Returns a dictionary that
-        when given an active qubit from the original circuit (i.e., a virtual qubit),
-        returns an active qubit from the transpiled circuit (i.e., a physical qubit).
+        when given a qubit from the original circuit (i.e., a virtual qubit),
+        returns a qubit from the transpiled circuit (i.e., a physical qubit).
 
     Args:
-        orig_circuit (QuantumCircuit): a circuit that
+        original_circuit (QuantumCircuit): a circuit that
             we submitted to qiskit and from which we get our virtual qubits.
         transpiled_circuit (QuantumCircuit): a circuit that
             qiskit ran and from which we get our physical qubits.
@@ -525,23 +528,25 @@ def get_v2p_layout(
             is not equal to the number of physical qubits.
 
     Returns:
-        v2p_layout_active (Dict[int, int]): a dictionary that
+        virtual_to_physical_qubits_dict (Dict[int, int]): a dictionary that
             when given a virtual qubit returns the corresponding physical qubit.
     """
-    active_virtual_qubits = get_active_qubits(orig_circuit)
-    clbits_to_virtual_qubits = get_clbit_qubit_map(orig_circuit)
-    clbits_to_physical_qubits = get_clbit_qubit_map(transpiled_circuit)
+    active_virtual_qubits = _get_active_qubits(
+        original_circuit
+    )  # we only use the active qubits for readout correction
+    clbits_to_virtual_qubits = _get_clbit_qubit_map(original_circuit)
+    clbits_to_physical_qubits = _get_clbit_qubit_map(transpiled_circuit)
 
     assert len(clbits_to_virtual_qubits) == len(clbits_to_physical_qubits)
 
-    v2p_layout_all = {
+    virtual_to_physical_qubits_dict_all = {
         c2v: c2p
         for c2v, c2p in zip(clbits_to_virtual_qubits, clbits_to_physical_qubits)
     }
-    v2p_layout_active = {
+    virtual_to_physical_qubits_dict = {
         virtual: physical
-        for virtual, physical in v2p_layout_all.items()
+        for virtual, physical in virtual_to_physical_qubits_dict_all.items()
         if virtual in active_virtual_qubits
     }
 
-    return v2p_layout_active
+    return virtual_to_physical_qubits_dict
