@@ -382,9 +382,11 @@ class QiskitBackend(QuantumBackend):
             physical_qubits = list(range(num_qubits))
         else:
             virtual_qubits = list(virtual_to_physical_qubits_dict.keys())
-            physical_qubits = list(virtual_to_physical_qubits_dict.values())
             virtual_qubits.sort()
-            physical_qubits.sort()
+            physical_qubits = [
+                virtual_to_physical_qubits_dict[virtual_qubit]
+                for virtual_qubit in virtual_qubits
+            ]
             for key in deepcopy(list(counts.keys())):
                 new_key = "".join(key[num_qubits - i - 1] for i in virtual_qubits)
                 counts[new_key] = counts.pop(key) + counts.get(new_key, 0)

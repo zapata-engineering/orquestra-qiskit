@@ -139,12 +139,12 @@ class TestQiskitBackend(QuantumBackendTests):
         self, backend_with_readout_correction
     ):
         # Given
-        extract_pickle_objects = open(
+        extracted_pickle_objects = open(
             "jobs_and_batches_with_different_qubits.pickle", "rb"
         )
-        jobs = pickle.load(extract_pickle_objects)
-        batches = pickle.load(extract_pickle_objects)
-        extract_pickle_objects.close()
+        jobs = pickle.load(extracted_pickle_objects)
+        batches = pickle.load(extracted_pickle_objects)
+        extracted_pickle_objects.close()
         multiplicities = [1]
 
         # When
