@@ -16,7 +16,11 @@ from qiskit.ignis.mitigation.measurement import (
     complete_meas_cal,
 )
 from qiskit.providers.ibmq import IBMQ
-from qiskit.providers.ibmq.exceptions import IBMQAccountError, IBMQBackendJobLimitError
+from qiskit.providers.ibmq.exceptions import (
+    IBMQAccountError,
+    IBMQBackendJobLimitError,
+    IBMQProviderError,
+)
 from qiskit.providers.ibmq.job import IBMQJob
 from qiskit.result import Counts
 
@@ -78,7 +82,14 @@ class QiskitBackend(QuantumBackend):
                 ):
                     raise RuntimeError(e)
 
-        provider = IBMQ.get_provider(hub=hub, group=group, project=project)
+        try:
+            provider = IBMQ.get_provider(hub=hub, group=group, project=project)
+        except IBMQProviderError as e:
+            if api_token is None:
+                raise RuntimeError("No providers were found. Missing IBMQ API token?")
+            else:
+                raise RuntimeError(e)
+
         self.device = provider.get_backend(name=self.device_name)
         self.max_shots = self.device.configuration().max_shots
         self.batch_size: int = self.device.configuration().max_experiments
