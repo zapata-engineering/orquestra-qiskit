@@ -14,7 +14,7 @@ from qiskit.providers.aer.noise import (
     phase_damping_error,
 )
 from qiskit.providers.ibmq import IBMQ
-from qiskit.providers.ibmq.exceptions import IBMQAccountError
+from qiskit.providers.ibmq.exceptions import IBMQAccountError, IBMQProviderError
 from qiskit.quantum_info import Kraus
 
 
@@ -47,9 +47,15 @@ def get_qiskit_noise_model(
                 raise RuntimeError(e)
 
     # Get qiskit noise model from qiskit
-    provider = IBMQ.get_provider(hub=hub, group=group, project=project)
-    noisy_device = provider.get_backend(device_name)
+    try:
+        provider = IBMQ.get_provider(hub=hub, group=group, project=project)
+    except IBMQProviderError as e:
+        if api_token is None:
+            raise RuntimeError("No providers were found. Missing IBMQ API token?")
+        else:
+            raise RuntimeError(e)
 
+    noisy_device = provider.get_backend(device_name)
     noise_model = AerNoise.NoiseModel.from_backend(noisy_device)
     coupling_map = noisy_device.configuration().coupling_map
 
