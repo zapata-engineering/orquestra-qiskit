@@ -333,14 +333,16 @@ class QiskitBackend(QuantumBackend):
                     )
                 circuit_index += 1
 
+            #Get virtual to physical qubit mapping
+            virtual_to_physical_qubits_dict = _get_virtual_to_physical_qubits_dict(
+                current_circuit_from_batches, current_circuit_from_jobs
+            )
+
             if self.readout_correction:
                 current_circuit_from_jobs = circuit_set_from_jobs[circuit_index - 1]
                 current_circuit_from_batches = circuit_set_from_batches[
                     circuit_index - 1
                 ]
-                virtual_to_physical_qubits_dict = _get_virtual_to_physical_qubits_dict(
-                    current_circuit_from_batches, current_circuit_from_jobs
-                )
                 combined_counts = self._apply_readout_correction(
                     combined_counts, virtual_to_physical_qubits_dict
                 )
@@ -352,6 +354,8 @@ class QiskitBackend(QuantumBackend):
                 reversed_counts[bitstring[::-1]] = int(combined_counts[bitstring])
 
             measurements = Measurements.from_counts(reversed_counts)
+            #Virtual to phyiscal mapping is part of measuremnts class
+            measurements.virtual_to_physical_qubits_dict = virtual_to_physical_qubits_dict
             measurements_set.append(measurements)
 
         return measurements_set
