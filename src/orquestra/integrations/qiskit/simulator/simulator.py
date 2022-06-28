@@ -8,8 +8,8 @@ import numpy as np
 from orquestra.quantum.api.backend import QuantumSimulator, StateVector
 from orquestra.quantum.circuits import Circuit
 from orquestra.quantum.circuits.layouts import CircuitConnectivity
-from orquestra.quantum.measurements import Measurements, sample_from_wavefunction
-from orquestra.quantum.wavefunction import flip_amplitudes
+from orquestra.quantum.measurements import Measurements
+from orquestra.quantum.wavefunction import flip_amplitudes, sample_from_wavefunction
 from qiskit import Aer, ClassicalRegister, QuantumCircuit, execute
 from qiskit.providers.aer.noise import NoiseModel
 from qiskit.providers.ibmq import IBMQ
