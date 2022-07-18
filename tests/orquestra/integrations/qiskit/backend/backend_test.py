@@ -140,7 +140,11 @@ class TestQiskitBackend(QuantumBackendTests):
     ):
         # Given
         extracted_pickle_objects = open(
-            "jobs_and_batches_with_different_qubits.pickle", "rb"
+            os.path.join(
+                os.path.dirname(__file__),
+                "jobs_and_batches_with_different_qubits.pickle",
+            ),
+            "rb",
         )
         jobs = pickle.load(extracted_pickle_objects)
         batches = pickle.load(extracted_pickle_objects)
