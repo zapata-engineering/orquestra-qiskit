@@ -333,7 +333,7 @@ class QiskitBackend(QuantumBackend):
                     )
                 circuit_index += 1
 
-            #Get virtual to physical qubit mapping
+            # Get virtual to physical qubit mapping
             virtual_to_physical_qubits_dict = _get_virtual_to_physical_qubits_dict(
                 current_circuit_from_batches, current_circuit_from_jobs
             )
@@ -354,8 +354,10 @@ class QiskitBackend(QuantumBackend):
                 reversed_counts[bitstring[::-1]] = int(combined_counts[bitstring])
 
             measurements = Measurements.from_counts(reversed_counts)
-            #Virtual to phyiscal mapping is part of measuremnts class
-            measurements.virtual_to_physical_qubits_dict = virtual_to_physical_qubits_dict
+            # Virtual to phyiscal mapping is part of measuremnts class
+            measurements.virtual_to_physical_qubits_dict = (
+                virtual_to_physical_qubits_dict
+            )
             measurements_set.append(measurements)
 
         return measurements_set
@@ -441,7 +443,8 @@ class QiskitBackend(QuantumBackend):
 
 
 def _get_active_qubits(circuit: QuantumCircuit) -> Set[int]:
-    """Returns a list of qubits that qiskit gates are operating on (i.e., active qubits).
+    """Returns a list of qubits that qiskit gates are
+       operating on (i.e., active qubits).
 
     Args:
         circuit (QuantumCircuit): a circuit that we want to find the active qubits for.
