@@ -175,6 +175,9 @@ class TestQiskitBackend(QuantumBackendTests):
 
             counts = measurements.get_counts()
             assert max(counts, key=counts.get) == "1"
+        assert len(backend.list_virtual_to_physical_qubits_dict) == len(
+            measurements_set
+        )
 
     def test_execute_with_retries(self, backend):
         # This test has a race condition where the IBMQ server might finish
@@ -199,6 +202,7 @@ class TestQiskitBackend(QuantumBackendTests):
 
         # Each job has a unique ID
         assert len(set([job.job_id() for job in jobs])) == num_jobs
+        assert len(backend.list_virtual_to_physical_qubits_dict) == 1
 
     def test_execute_with_retries_timeout(self, backend):
         # This test has a race condition where the IBMQ server might finish
@@ -244,6 +248,9 @@ class TestQiskitBackend(QuantumBackendTests):
 
         # Then
         assert len(measurements_set) == num_circuits
+        assert len(backend.list_virtual_to_physical_qubits_dict) == len(
+            measurements_set
+        )
 
     def test_run_circuitset_and_measure_split_circuits_and_jobs(self, backend):
         # Given
@@ -263,6 +270,9 @@ class TestQiskitBackend(QuantumBackendTests):
         )
         # Then
         assert len(measurements_set) == num_circuits
+        assert len(backend.list_virtual_to_physical_qubits_dict) == len(
+            measurements_set
+        )
         for measurements in measurements_set:
             assert len(measurements.bitstrings) == n_samples or len(
                 measurements.bitstrings
@@ -341,6 +351,10 @@ class TestQiskitBackend(QuantumBackendTests):
             str(physical_qubits)
         )
         assert copied_counts == pytest.approx(mitigated_counts, 10e-5)
+        assert (
+            len(backend_with_readout_correction.list_virtual_to_physical_qubits_dict)
+            == 1
+        )
 
     def test_subset_readout_correction_with_unspecified_virtual_to_physical_qubits_dict(
         self, backend_with_readout_correction
@@ -455,6 +469,9 @@ class TestQiskitBackend(QuantumBackendTests):
         assert len(measurements_set[1].bitstrings) >= n_samples[1]
 
         assert backend.number_of_circuits_run == 2
+        assert len(backend.list_virtual_to_physical_qubits_dict) == len(
+            measurements_set
+        )
 
     @pytest.mark.parametrize("n_samples", [1, 2, 10])
     def test_run_circuit_and_measure_correct_num_measurements_attribute(
