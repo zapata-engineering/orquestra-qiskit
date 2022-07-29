@@ -13,7 +13,7 @@ from orquestra.quantum.api.estimation import EstimationTask
 from orquestra.quantum.circuits import CNOT, Circuit, X
 from orquestra.quantum.estimation import estimate_expectation_values_by_averaging
 from orquestra.quantum.measurements import ExpectationValues
-from orquestra.quantum.openfermion.ops import QubitOperator
+from orquestra.quantum.wip.operators import PauliTerm
 
 from orquestra.integrations.qiskit.noise import get_qiskit_noise_model
 from orquestra.integrations.qiskit.simulator import QiskitSimulator
@@ -127,7 +127,7 @@ class TestQiskitSimulator(QuantumSimulatorTests):
         # Flip qubit an even number of times to remain in the |1> state, but allow
         # decoherence to take effect
         circuit += Circuit([X(0) for i in range(10)])
-        qubit_operator = QubitOperator("Z0")
+        qubit_operator = PauliTerm("Z0")
         n_samples = 8192
         # When
 
@@ -154,7 +154,7 @@ class TestQiskitSimulator(QuantumSimulatorTests):
         # Flip qubit an even number of times to remain in the |1> state, but allow
         # decoherence to take effect
         circuit += Circuit([X(0) for i in range(50)])
-        qubit_operator = QubitOperator("Z0")
+        qubit_operator = PauliTerm("Z0")
         # When
         estimation_tasks = [EstimationTask(qubit_operator, circuit, n_samples)]
 
@@ -188,7 +188,7 @@ class TestQiskitSimulator(QuantumSimulatorTests):
             device_connectivity=connectivity,
             optimization_level=0,
         )
-        qubit_operator = QubitOperator("Z0")
+        qubit_operator = PauliTerm("Z0")
         # Initialize in |1> state
         circuit = Circuit([X(0)])
         # Flip qubit an even number of times to remain in the |1> state, but allow
