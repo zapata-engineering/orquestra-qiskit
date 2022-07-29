@@ -18,7 +18,6 @@
 """
 Translates OpenFermion Objects to qiskit SummedOp objects
 """
-from orquestra.quantum.openfermion import count_qubits
 from orquestra.quantum.wip.operators import PauliRepresentation, PauliSum, PauliTerm
 from qiskit.opflow import PauliOp, SummedOp
 from qiskit.quantum_info import Pauli
@@ -38,7 +37,7 @@ def qubitop_to_qiskitpauli(operator: PauliRepresentation) -> SummedOp:
 
     terms = []
     for term in operator.terms:
-        string_term = "I" * count_qubits(operator)
+        string_term = "I" * len(operator)
         for term_qubit, term_pauli in term._ops.items():
             string_term = (
                 string_term[:term_qubit] + term_pauli + string_term[term_qubit + 1 :]
