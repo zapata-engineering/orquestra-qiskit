@@ -21,10 +21,8 @@ from orquestra.quantum.openfermion.ops import (
     FermionOperator,
     InteractionOperator,
     InteractionRDM,
-    QubitOperator,
 )
-from orquestra.quantum.openfermion.transforms import jordan_wigner
-from orquestra.quantum.openfermion.utils import hermitian_conjugated
+from orquestra.quantum.wip.operators import PauliSum, PauliTerm
 from qiskit.opflow import PauliOp, SummedOp
 from qiskit.quantum_info import Pauli
 
@@ -52,14 +50,11 @@ def test_translation_type_enforcement():
         qubitop_to_qiskitpauli(interact_rdm)
 
 
-def test_qubitop_to_qiskitpauli():
+def test_paulisum_to_qiskitpauli():
     """
-    Conversion of QubitOperator; accuracy test
+    Conversion of PauliSum to qiskit SummedOp; accuracy test
     """
-    hop_term = FermionOperator(((2, 1), (0, 0)))
-    term = hop_term + hermitian_conjugated(hop_term)
-
-    pauli_term = jordan_wigner(term)
+    pauli_term = PauliSum.from_str("0.5*X0*Z1*X2 + 0.5*Y0*Z1*Y2")
 
     qiskit_op = qubitop_to_qiskitpauli(pauli_term)
 
@@ -70,8 +65,21 @@ def test_qubitop_to_qiskitpauli():
     assert ground_truth == qiskit_op
 
 
+def test_pauliterm_to_qiskitpauli():
+    """
+    Conversion of PauliTerm to qiskit SummedOp; accuracy test
+    """
+    pauli_term = PauliTerm.from_str("2.25*Y0*X1*Z2*X4")
+
+    qiskit_op = qubitop_to_qiskitpauli(pauli_term)
+
+    ground_truth = SummedOp([PauliOp(Pauli.from_label("YXZIX"), 2.25)])
+
+    assert ground_truth == qiskit_op
+
+
 def test_qubitop_to_qiskitpauli_zero():
-    zero_term = QubitOperator()
+    zero_term = PauliSum()
     qiskit_term = qubitop_to_qiskitpauli(zero_term)
     ground_truth = SummedOp([])
 
@@ -79,12 +87,15 @@ def test_qubitop_to_qiskitpauli_zero():
 
 
 def test_qiskitpauli_to_qubitop():
+    """
+    Conversion of qiskit SummedOp to PauliSum; accuracy test
+    """
     qiskit_term = SummedOp([PauliOp(Pauli.from_label("XIIIIY"), coeff=1)])
 
-    op_fermion_term = QubitOperator(((0, "X"), (5, "Y")))
-    test_op_fermion_term = qiskitpauli_to_qubitop(qiskit_term)
+    expected_pauli_term = PauliTerm.from_list([("X", 0), ("Y", 5)])
+    test_pauli_term = qiskitpauli_to_qubitop(qiskit_term)
 
-    assert test_op_fermion_term.isclose(op_fermion_term)
+    assert test_pauli_term == expected_pauli_term
 
 
 def test_qiskitpauli_to_qubitop_type_enforced():
