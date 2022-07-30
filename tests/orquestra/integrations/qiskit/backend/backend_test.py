@@ -294,9 +294,7 @@ class TestQiskitBackend(QuantumBackendTests):
         # Then
         assert backend_with_readout_correction.readout_correction
         assert backend_with_readout_correction.readout_correction_filters is not None
-        assert len(backend.list_virtual_to_physical_qubits_dict) == len(
-            measurements_set
-        )
+        assert len(backend.list_virtual_to_physical_qubits_dict) == 1
 
     def test_readout_correction_for_distributed_circuit(
         self, backend_with_readout_correction
