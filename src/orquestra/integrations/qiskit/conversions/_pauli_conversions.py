@@ -18,61 +18,63 @@
 """
 Translates OpenFermion Objects to qiskit SummedOp objects
 """
-from orquestra.quantum.openfermion import QubitOperator, count_qubits
+from orquestra.quantum.wip.operators import PauliRepresentation, PauliSum, PauliTerm
 from qiskit.opflow import PauliOp, SummedOp
 from qiskit.quantum_info import Pauli
 
 
-def qubitop_to_qiskitpauli(qubit_operator: QubitOperator) -> SummedOp:
-    """Convert a OpenFermion QubitOperator to a SummedOp.
+def qubitop_to_qiskitpauli(operator: PauliRepresentation) -> SummedOp:
+    """Convert a PauliRepresentation to a SummedOp.
 
     Args:
-        qubit_operator: OpenFermion QubitOperator to convert
+        operator: PauliRepresentation to convert
 
     Returns:
         SummedOp representing the qubit operator
     """
-    if not isinstance(qubit_operator, QubitOperator):
-        raise TypeError("qubit_operator must be an OpenFermion QubitOperator object")
+    if not isinstance(operator, PauliSum) and not isinstance(operator, PauliTerm):
+        raise TypeError("operator must be an Orquestra PauliSum or PauliTerm object")
 
     terms = []
-    for qubit_terms, coefficient in qubit_operator.terms.items():
-        string_term = "I" * count_qubits(qubit_operator)
-        for i, (term_qubit, term_pauli) in enumerate(qubit_terms):
+    for term in operator.terms:
+        string_term = "I" * len(operator)
+        for term_qubit, term_pauli in term._ops.items():
             string_term = (
                 string_term[:term_qubit] + term_pauli + string_term[term_qubit + 1 :]
             )
-        terms.append(PauliOp(Pauli.from_label(string_term), coeff=coefficient))
+        terms.append(PauliOp(Pauli.from_label(string_term), coeff=term.coefficient))
 
     return SummedOp(terms)
 
 
-def qiskitpauli_to_qubitop(qiskit_pauli: SummedOp) -> QubitOperator:
-    """Convert a qiskit's SummedOp to an OpenFermion QubitOperator.
+def qiskitpauli_to_qubitop(qiskit_pauli: SummedOp) -> PauliSum:
+    """Convert a qiskit's SummedOp to a PauliSum.
 
     Args:
         qiskit_pauli: operator to convert
 
     Returns:
-        QubitOperator representing the SummedOp
+        PauliSum representing the SummedOp
     """
 
     if not isinstance(qiskit_pauli, SummedOp):
         raise TypeError("qiskit_pauli must be a qiskit SummedOp")
 
-    transformed_term = QubitOperator()
+    transformed_operator = PauliSum()
 
     for pauli_op in qiskit_pauli._oplist:
         qiskit_term, weight = pauli_op.primitive, pauli_op.coeff
 
-        openfermion_term = QubitOperator()
+        orquestra_term = PauliTerm.identity()
         for (term_qubit, term_pauli) in enumerate(str(qiskit_term)):
             if term_pauli != "I":
-                if openfermion_term == QubitOperator():
-                    openfermion_term = QubitOperator(f"[{term_pauli}{term_qubit}]")
+                if orquestra_term == PauliTerm.identity():
+                    orquestra_term = PauliTerm(f"{term_pauli}{term_qubit}")
                 else:
-                    openfermion_term *= QubitOperator(f"[{term_pauli}{term_qubit}]")
+                    product = PauliTerm(f"{term_pauli}{term_qubit}") * orquestra_term
+                    assert isinstance(product, PauliTerm)
+                    orquestra_term = product
 
-        transformed_term += openfermion_term * weight
+        transformed_operator += orquestra_term * weight
 
-    return transformed_term
+    return transformed_operator
