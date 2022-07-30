@@ -202,7 +202,6 @@ class TestQiskitBackend(QuantumBackendTests):
 
         # Each job has a unique ID
         assert len(set([job.job_id() for job in jobs])) == num_jobs
-        assert len(backend.list_virtual_to_physical_qubits_dict) == 1
 
     def test_execute_with_retries_timeout(self, backend):
         # This test has a race condition where the IBMQ server might finish
@@ -295,6 +294,9 @@ class TestQiskitBackend(QuantumBackendTests):
         # Then
         assert backend_with_readout_correction.readout_correction
         assert backend_with_readout_correction.readout_correction_filters is not None
+        assert len(backend.list_virtual_to_physical_qubits_dict) == len(
+            measurements_set
+        )
 
     def test_readout_correction_for_distributed_circuit(
         self, backend_with_readout_correction
@@ -351,10 +353,6 @@ class TestQiskitBackend(QuantumBackendTests):
             str(physical_qubits)
         )
         assert copied_counts == pytest.approx(mitigated_counts, 10e-5)
-        assert (
-            len(backend_with_readout_correction.list_virtual_to_physical_qubits_dict)
-            == 1
-        )
 
     def test_subset_readout_correction_with_unspecified_virtual_to_physical_qubits_dict(
         self, backend_with_readout_correction
