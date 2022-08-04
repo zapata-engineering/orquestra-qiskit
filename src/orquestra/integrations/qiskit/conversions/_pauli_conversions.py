@@ -38,7 +38,7 @@ def qubitop_to_qiskitpauli(operator: PauliRepresentation) -> SummedOp:
     terms = []
     for term in operator.terms:
         string_term = "I" * len(operator)
-        for term_qubit, term_pauli in term._ops.items():
+        for term_qubit, term_pauli in term.operations:
             string_term = (
                 string_term[:term_qubit] + term_pauli + string_term[term_qubit + 1 :]
             )
