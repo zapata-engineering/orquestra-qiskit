@@ -54,7 +54,7 @@ def test_paulisum_to_qiskitpauli():
     """
     Conversion of PauliSum to qiskit SummedOp; accuracy test
     """
-    pauli_term = PauliSum.from_str("0.5*X0*Z1*X2 + 0.5*Y0*Z1*Y2")
+    pauli_term = PauliSum("0.5*X0*Z1*X2 + 0.5*Y0*Z1*Y2")
 
     qiskit_op = qubitop_to_qiskitpauli(pauli_term)
 
@@ -69,7 +69,7 @@ def test_pauliterm_to_qiskitpauli():
     """
     Conversion of PauliTerm to qiskit SummedOp; accuracy test
     """
-    pauli_term = PauliTerm.from_str("2.25*Y0*X1*Z2*X4")
+    pauli_term = PauliTerm("2.25*Y0*X1*Z2*X4")
 
     qiskit_op = qubitop_to_qiskitpauli(pauli_term)
 
