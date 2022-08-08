@@ -104,6 +104,7 @@ class QiskitBackend(QuantumBackend):
         self.retry_timeout_seconds = retry_timeout_seconds
         self.n_samples_for_readout_calibration = n_samples_for_readout_calibration
         self.noise_inversion_method = noise_inversion_method
+        self.list_virtual_to_physical_qubits_dict: List[Dict[int, int]] = []
 
     def run_circuit_and_measure(self, circuit: Circuit, n_samples: int) -> Measurements:
         """Run a circuit and measure a certain number of bitstrings.
@@ -315,6 +316,8 @@ class QiskitBackend(QuantumBackend):
         """
         circuit_set_from_jobs = []  # circuits that qiskit ran
         circuit_set_from_batches = []  # circuits that users sent
+        self.list_virtual_to_physical_qubits_dict = []
+
         circuit_counts_set = []
         for job, batch in zip(jobs, batches):
             circuit_set_from_jobs.extend(job.circuits())
@@ -333,14 +336,12 @@ class QiskitBackend(QuantumBackend):
                     )
                 circuit_index += 1
 
+            current_circuit_from_jobs = circuit_set_from_jobs[circuit_index - 1]
+            current_circuit_from_batches = circuit_set_from_batches[circuit_index - 1]
+            virtual_to_physical_qubits_dict = _get_virtual_to_physical_qubits_dict(
+                current_circuit_from_batches, current_circuit_from_jobs
+            )
             if self.readout_correction:
-                current_circuit_from_jobs = circuit_set_from_jobs[circuit_index - 1]
-                current_circuit_from_batches = circuit_set_from_batches[
-                    circuit_index - 1
-                ]
-                virtual_to_physical_qubits_dict = _get_virtual_to_physical_qubits_dict(
-                    current_circuit_from_batches, current_circuit_from_jobs
-                )
                 combined_counts = self._apply_readout_correction(
                     combined_counts, virtual_to_physical_qubits_dict
                 )
@@ -352,6 +353,9 @@ class QiskitBackend(QuantumBackend):
                 reversed_counts[bitstring[::-1]] = int(combined_counts[bitstring])
 
             measurements = Measurements.from_counts(reversed_counts)
+            self.list_virtual_to_physical_qubits_dict.append(
+                virtual_to_physical_qubits_dict
+            )
             measurements_set.append(measurements)
 
         return measurements_set
