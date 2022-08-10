@@ -18,7 +18,7 @@
 """
 Translates OpenFermion Objects to qiskit SummedOp objects
 """
-from orquestra.quantum.wip.operators import PauliRepresentation, PauliSum, PauliTerm
+from orquestra.quantum.operators import PauliRepresentation, PauliSum, PauliTerm
 from qiskit.opflow import PauliOp, SummedOp
 from qiskit.quantum_info import Pauli
 

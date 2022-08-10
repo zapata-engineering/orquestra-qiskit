@@ -13,7 +13,7 @@ from orquestra.quantum.api.estimation import EstimationTask
 from orquestra.quantum.circuits import CNOT, Circuit, X
 from orquestra.quantum.estimation import estimate_expectation_values_by_averaging
 from orquestra.quantum.measurements import ExpectationValues
-from orquestra.quantum.wip.operators import PauliTerm
+from orquestra.quantum.operators import PauliTerm
 
 from orquestra.integrations.qiskit.noise import get_qiskit_noise_model
 from orquestra.integrations.qiskit.simulator import QiskitSimulator
