@@ -15,13 +15,7 @@
 #   limitations under the License.
 ############################################################################
 
-import numpy as np
 import pytest
-from orquestra.quantum.openfermion.ops import (
-    FermionOperator,
-    InteractionOperator,
-    InteractionRDM,
-)
 from orquestra.quantum.operators import PauliSum, PauliTerm
 from qiskit.opflow import PauliOp, SummedOp
 from qiskit.quantum_info import Pauli
@@ -36,18 +30,17 @@ def test_translation_type_enforcement():
     """
     Make sure type check works
     """
-    create_one = FermionOperator("1^")
-    empty_one_body = np.zeros((2, 2))
-    empty_two_body = np.zeros((2, 2, 2, 2))
-    interact_one = InteractionOperator(1, empty_one_body, empty_two_body)
-    interact_rdm = InteractionRDM(empty_one_body, empty_two_body)
+    sample_str = "Z0*Z1"
+    sample_int = 1
+    qiskit_op = SummedOp([PauliOp(Pauli.from_label("YXZIX"), 2.25)])
 
+    # don't accept anything other than orquestra PauliSum or PauliTerm
     with pytest.raises(TypeError):
-        qubitop_to_qiskitpauli(create_one)
+        qubitop_to_qiskitpauli(sample_str)
     with pytest.raises(TypeError):
-        qubitop_to_qiskitpauli(interact_one)
+        qubitop_to_qiskitpauli(sample_int)
     with pytest.raises(TypeError):
-        qubitop_to_qiskitpauli(interact_rdm)
+        qubitop_to_qiskitpauli(qiskit_op)
 
 
 def test_paulisum_to_qiskitpauli():
@@ -100,15 +93,14 @@ def test_qiskitpauli_to_qubitop():
 
 def test_qiskitpauli_to_qubitop_type_enforced():
     """Enforce the appropriate type"""
-    create_one = FermionOperator("1^")
-    empty_one_body = np.zeros((2, 2))
-    empty_two_body = np.zeros((2, 2, 2, 2))
-    interact_one = InteractionOperator(1, empty_one_body, empty_two_body)
-    interact_rdm = InteractionRDM(empty_one_body, empty_two_body)
+    sample_str = "Z0*Z1"
+    sample_int = 1
+    orq_term = PauliSum("0.5*X0*Z1*X2 + 0.5*Y0*Z1*Y2")
 
+    # don't accept anything other than qiskit SummedOp
     with pytest.raises(TypeError):
-        qiskitpauli_to_qubitop(create_one)
+        qiskitpauli_to_qubitop(sample_str)
     with pytest.raises(TypeError):
-        qiskitpauli_to_qubitop(interact_one)
+        qiskitpauli_to_qubitop(sample_int)
     with pytest.raises(TypeError):
-        qiskitpauli_to_qubitop(interact_rdm)
+        qiskitpauli_to_qubitop(orq_term)
