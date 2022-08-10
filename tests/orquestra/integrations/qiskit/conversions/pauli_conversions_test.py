@@ -85,7 +85,7 @@ def test_qiskitpauli_to_qubitop():
     """
     qiskit_term = SummedOp([PauliOp(Pauli.from_label("XIIIIY"), coeff=1)])
 
-    expected_pauli_term = PauliTerm.from_list([("X", 0), ("Y", 5)])
+    expected_pauli_term = PauliTerm.from_iterable([("X", 0), ("Y", 5)])
     test_pauli_term = qiskitpauli_to_qubitop(qiskit_term)
 
     assert test_pauli_term == expected_pauli_term
