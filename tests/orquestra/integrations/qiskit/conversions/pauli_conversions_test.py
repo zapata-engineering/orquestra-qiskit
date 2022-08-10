@@ -22,7 +22,7 @@ from orquestra.quantum.openfermion.ops import (
     InteractionOperator,
     InteractionRDM,
 )
-from orquestra.quantum.wip.operators import PauliSum, PauliTerm
+from orquestra.quantum.operators import PauliSum, PauliTerm
 from qiskit.opflow import PauliOp, SummedOp
 from qiskit.quantum_info import Pauli
 
