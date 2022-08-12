@@ -272,6 +272,10 @@ EQUIVALENT_NON_PARAMETRIZED_CIRCUITS = [
             ],
         ),
     ),
+    (
+        _circuit.Circuit([_builtin_gates.Delay(1)(0)]),
+        _make_qiskit_circuit(1, [("delay", (1, 0))])
+    )
 ]
 
 
