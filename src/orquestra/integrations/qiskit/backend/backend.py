@@ -6,7 +6,8 @@ import time
 from copy import deepcopy
 from typing import Dict, List, Optional, Sequence, Set, Tuple
 
-from orquestra.quantum.api.backend import QuantumBackend
+
+from orquestra.quantum.api.circuit_runner import CircuitRunner
 from orquestra.quantum.circuits import Circuit
 from orquestra.quantum.measurements import Measurements
 from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister, execute
@@ -27,7 +28,8 @@ from qiskit.result import Counts
 from orquestra.integrations.qiskit.conversions import export_to_qiskit
 
 
-class QiskitBackend(QuantumBackend):
+class QiskitBackend(CircuitRunner):
+
     def __init__(
         self,
         device_name: str,
@@ -68,7 +70,8 @@ class QiskitBackend(QuantumBackend):
                 correction. Options are "least_squares" and "pseudo_inverse".
                 Defaults to "least_squares."
         """
-        super().__init__()
+        self.n_jobs_executed = 0
+        self.n_circuits_executed = 0
         self.device_name = device_name
 
         if api_token is not None:
@@ -106,7 +109,7 @@ class QiskitBackend(QuantumBackend):
         self.noise_inversion_method = noise_inversion_method
         self.list_virtual_to_physical_qubits_dict: List[Dict[int, int]] = []
 
-    def run_circuit_and_measure(self, circuit: Circuit, n_samples: int) -> Measurements:
+    def run_and_measure(self, circuit: Circuit, n_samples: int) -> Measurements:
         """Run a circuit and measure a certain number of bitstrings.
 
         Args:
@@ -117,7 +120,7 @@ class QiskitBackend(QuantumBackend):
             raise ValueError("n_samples should be greater than 0.")
         return self.run_circuitset_and_measure([circuit], [n_samples])[0]
 
-    def run_circuitset_and_measure(
+    def run_batch_and_measure(
         self,
         circuits: Sequence[Circuit],
         n_samples: Sequence[int],
@@ -146,8 +149,8 @@ class QiskitBackend(QuantumBackend):
             for n_samples, batch in zip(n_samples_for_batches, batches)
         ]
 
-        self.number_of_circuits_run += len(circuits)
-        self.number_of_jobs_run += len(batches)
+        self.n_circuits_executed += len(circuits)
+        self.n_jobs_executed += len(batches)
 
         return self.aggregate_measurements(jobs, batches, multiplicities)
 
