@@ -8,6 +8,7 @@ from copy import deepcopy
 
 import pytest
 import qiskit
+from orquestra.quantum.api.circuit_runner_contracts import CIRCUIT_RUNNER_CONTRACTS
 from orquestra.quantum.api.backend_test import QuantumBackendTests
 from orquestra.quantum.circuits import CNOT, Circuit, X
 from orquestra.quantum.measurements import Measurements
@@ -51,6 +52,11 @@ def backend(request):
 )
 def backend_with_readout_correction(request):
     return QiskitBackend(**request.param)
+
+
+@pytest.mark.parametrize("contract", CIRCUIT_RUNNER_CONTRACTS)
+def test_qiskit_backend_fullfills_backend_simulator_contracts(backend, contract):
+    assert contract(backend)
 
 
 class TestQiskitBackend(QuantumBackendTests):
@@ -165,7 +171,7 @@ class TestQiskitBackend(QuantumBackendTests):
         circuit = self.x_circuit()
         n_samples = 100
         # When
-        measurements_set = backend.run_circuitset_and_measure(
+        measurements_set = backend.run_batch_and_measure(
             [circuit] * num_circuits, [n_samples] * num_circuits
         )
         # Then
@@ -241,7 +247,7 @@ class TestQiskitBackend(QuantumBackendTests):
         )
 
         # When
-        measurements_set = backend_with_readout_correction.run_circuitset_and_measure(
+        measurements_set = backend_with_readout_correction.run_batch_and_measure(
             [circuit] * num_circuits, [n_samples] * num_circuits
         )
 
@@ -264,7 +270,7 @@ class TestQiskitBackend(QuantumBackendTests):
         )
 
         # When
-        measurements_set = backend.run_circuitset_and_measure(
+        measurements_set = backend.run_batch_and_measure(
             [circuit] * num_circuits, [n_samples] * num_circuits
         )
         # Then
@@ -289,7 +295,7 @@ class TestQiskitBackend(QuantumBackendTests):
         circuit = self.x_cnot_circuit()
 
         # When
-        backend_with_readout_correction.run_circuit_and_measure(circuit, n_samples=1)
+        backend_with_readout_correction.run_and_measure(circuit, n_samples=1)
 
         # Then
         assert backend_with_readout_correction.readout_correction
@@ -308,7 +314,7 @@ class TestQiskitBackend(QuantumBackendTests):
         n_samples = 100
 
         # When
-        measurements_set = backend_with_readout_correction.run_circuitset_and_measure(
+        measurements_set = backend_with_readout_correction.run_batch_and_measure(
             [circuit] * num_circuits, [n_samples] * num_circuits
         )
 
@@ -455,7 +461,7 @@ class TestQiskitBackend(QuantumBackendTests):
         n_samples = [2, 3]
 
         # When
-        measurements_set = backend.run_circuitset_and_measure(
+        measurements_set = backend.run_batch_and_measure(
             [first_circuit, second_circuit], n_samples
         )
 

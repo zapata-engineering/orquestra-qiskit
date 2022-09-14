@@ -118,7 +118,7 @@ class QiskitBackend(CircuitRunner):
         """
         if n_samples <= 0:
             raise ValueError("n_samples should be greater than 0.")
-        return self.run_circuitset_and_measure([circuit], [n_samples])[0]
+        return self.run_batch_and_measure([circuit], [n_samples])[0]
 
     def run_batch_and_measure(
         self,
@@ -128,7 +128,7 @@ class QiskitBackend(CircuitRunner):
         """Run a set of circuits and measure a certain number of bitstrings.
 
         Args:
-            circuitset: the circuits to run
+            circuits: the circuits to run
             n_samples: The number of shots to perform on each circuit.
 
         Returns:
@@ -178,6 +178,18 @@ class QiskitBackend(CircuitRunner):
         ibmq_circuitset = []
         n_samples_for_ibmq_circuits = []
         multiplicities = []
+
+        n_samples = [n_samples] * len(circuitset) if isinstance(n_samples, int) else n_samples
+
+        if len(n_samples) != len(circuitset):
+            raise ValueError(
+                "n_samples has to be a single int or a sequence of the same "
+                f"length as circuitset {len(circuitset)}. Got sequence of "
+                f"length {len(n_samples)} instead."
+            )
+
+        if any(n <= 0 for n in n_samples):
+            raise ValueError("Number of samples has to be positive.")
 
         for n_samples_for_circuit, circuit in zip(n_samples, circuitset):
             ibmq_circuit = export_to_qiskit(circuit)
