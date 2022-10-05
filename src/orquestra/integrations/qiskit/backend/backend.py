@@ -137,9 +137,10 @@ class QiskitBackend(QuantumBackend):
             n_samples_for_experiments,
             multiplicities,
         ) = self.transform_circuitset_to_ibmq_experiments(circuits, n_samples)
-        batches, n_samples_for_batches = self.batch_experiments(
-            experiments, n_samples_for_experiments
-        )
+        (
+            batches,
+            n_samples_for_batches,
+        ) = self.batch_experiments(experiments, n_samples_for_experiments)
 
         jobs = [
             self.execute_with_retries(batch, n_samples)
@@ -317,7 +318,6 @@ class QiskitBackend(QuantumBackend):
         circuit_set_from_jobs = []  # circuits that qiskit ran
         circuit_set_from_batches = []  # circuits that users sent
         self.list_virtual_to_physical_qubits_dict = []
-
         circuit_counts_set = []
         for job, batch in zip(jobs, batches):
             circuit_set_from_jobs.extend(job.circuits())
