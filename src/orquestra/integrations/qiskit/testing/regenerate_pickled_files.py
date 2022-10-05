@@ -37,6 +37,9 @@ def pickle_jobs_and_batches_with_different_qubits():
     for job in jobs:
         job.result()
 
+    # we dont care about the results, we just want to pickle the jobs object
+    jobs[0].result().results[0].data.counts["0x9"] = n_samples
+
     with open(
         os.path.join(file_path, "jobs_and_batches_with_different_qubits.pickle"), "wb"
     ) as f:
