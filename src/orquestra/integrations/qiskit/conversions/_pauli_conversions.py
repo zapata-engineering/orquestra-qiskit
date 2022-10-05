@@ -42,7 +42,7 @@ def qubitop_to_qiskitpauli(operator: PauliRepresentation) -> SummedOp:
             string_term = (
                 string_term[:term_qubit] + term_pauli + string_term[term_qubit + 1 :]
             )
-        terms.append(PauliOp(Pauli.from_label(string_term), coeff=term.coefficient))
+        terms.append(PauliOp(Pauli(string_term), coeff=term.coefficient))
 
     return SummedOp(terms)
 
