@@ -156,10 +156,12 @@ class TestQiskitBackend(QuantumBackendTests):
         )
 
         # Then
-        if backend_with_readout_correction.noise_inversion_method == "pseudo_inverse":
-            assert results[0].get_counts() == {"0000": 1, "1001": 48, "1101": 1}
-        else:
-            assert results[0].get_counts() == {"1001": 48}
+        lst = backend_with_readout_correction.list_virtual_to_physical_qubits_dict
+        assert len(lst) == 1
+        # ensure jobs and batches had different qubits which had to be remapped
+        assert lst[0] != {0: 0, 1: 1, 2: 2, 3: 3, 4: 4}
+        if backend_with_readout_correction.noise_inversion_method != "pseudo_inverse":
+            assert results[0].get_counts() == {"1001": 50}
 
     def test_run_circuitset_and_measure(self, backend):
         # Given
