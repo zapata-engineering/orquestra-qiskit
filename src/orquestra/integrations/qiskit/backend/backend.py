@@ -10,11 +10,6 @@ from orquestra.quantum.api.backend import QuantumBackend
 from orquestra.quantum.circuits import Circuit
 from orquestra.quantum.measurements import Measurements
 from qiskit import ClassicalRegister, QuantumCircuit, QuantumRegister, execute
-from qiskit.ignis.mitigation.measurement import (
-    CompleteMeasFitter,
-    MeasurementFilter,
-    complete_meas_cal,
-)
 from qiskit.providers.ibmq import IBMQ
 from qiskit.providers.ibmq.exceptions import (
     IBMQAccountError,
@@ -23,6 +18,8 @@ from qiskit.providers.ibmq.exceptions import (
 )
 from qiskit.providers.ibmq.job import IBMQJob
 from qiskit.result import Counts
+from qiskit.utils.mitigation import CompleteMeasFitter, complete_meas_cal
+from qiskit.utils.mitigation._filters import MeasurementFilter
 
 from orquestra.integrations.qiskit.conversions import export_to_qiskit
 
