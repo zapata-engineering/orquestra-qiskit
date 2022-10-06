@@ -1,5 +1,5 @@
 from functools import singledispatch
-from typing import Union, Optional
+from typing import Union, Optional, Sequence
 
 from qiskit import execute, ClassicalRegister, QuantumCircuit
 from qiskit.providers import BackendV1, BackendV2
@@ -37,3 +37,14 @@ class QiskitRunner(BaseCircuitRunner):
             backend_properties=self.backend.properties()
         )
         return Measurements(job.result().get_counts())
+
+    def _run_batch_and_measure(self, batch: Sequence[Circuit], samples_per_circuit: Sequence[int]):
+        job = execute(
+            [prepare_for_running_on_backend(circuit) for circuit in batch],
+            backend=self.backend,
+            shots=max(samples_per_circuit),
+            optimization_level=0,
+            backend_properties=self.backend.properties()
+        )
+
+        return [Measurements(counts) for counts in job.result().get_counts()]
