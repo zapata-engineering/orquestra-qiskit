@@ -1,6 +1,7 @@
-from typing import Union
+from functools import singledispatch
+from typing import Union, Optional
 
-from qiskit import execute, ClassicalRegister
+from qiskit import execute, ClassicalRegister, QuantumCircuit
 from qiskit.providers import BackendV1, BackendV2
 
 from orquestra.integrations.qiskit.conversions import export_to_qiskit
@@ -9,6 +10,13 @@ from orquestra.quantum.circuits import Circuit
 from orquestra.quantum.measurements import Measurements
 
 AnyQiskitBackend = Union[BackendV1, BackendV2]
+
+
+def prepare_for_running_on_backend(circuit: Circuit) -> QuantumCircuit:
+    qiskit_circuit = export_to_qiskit(circuit)
+    qiskit_circuit.add_register(ClassicalRegister(size=qiskit_circuit.num_qubits))
+    qiskit_circuit.measure(qiskit_circuit.qubits, qiskit_circuit.clbits)
+    return qiskit_circuit
 
 
 class QiskitRunner(BaseCircuitRunner):
@@ -21,13 +29,8 @@ class QiskitRunner(BaseCircuitRunner):
         self.backend = qiskit_backend
 
     def _run_and_measure(self, circuit: Circuit, n_samples: int) -> Measurements:
-        qiskit_circuit = export_to_qiskit(circuit)
-        qiskit_circuit.barrier(qiskit_circuit.qubits)
-        qiskit_circuit.add_register(ClassicalRegister(size=qiskit_circuit.num_qubits))
-        qiskit_circuit.measure(qiskit_circuit.qubits, qiskit_circuit.clbits)
-
         job = execute(
-            qiskit_circuit,
+            prepare_for_running_on_backend(circuit),
             backend=self.backend,
             shots=n_samples,
             optimization_level=0,
