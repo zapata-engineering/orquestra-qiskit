@@ -141,21 +141,20 @@ class TestQiskitBackend(QuantumBackendTests):
         )
         assert len(measurements_set) == 2
 
-    def test_aggregate_measurements_extract_correct_qubits(
+    def test_aggregate_measurements_extracts_correct_qubits(
         self, backend_with_readout_correction
     ):
         # Given
-        extracted_pickle_objects = open(
+        with open(
             os.path.join(
                 os.path.dirname(__file__),
                 "jobs_and_batches_with_different_qubits.pickle",
             ),
             "rb",
-        )
-        jobs = pickle.load(extracted_pickle_objects)
-        batches = pickle.load(extracted_pickle_objects)
-        extracted_pickle_objects.close()
-        multiplicities = [1]
+        ) as f:
+            jobs = pickle.load(f)
+            batches = pickle.load(f)
+            multiplicities = pickle.load(f)
 
         # When
         results = backend_with_readout_correction.aggregate_measurements(
@@ -163,7 +162,12 @@ class TestQiskitBackend(QuantumBackendTests):
         )
 
         # Then
-        assert results[0].get_counts() == {"11": 50}
+        lst = backend_with_readout_correction.list_virtual_to_physical_qubits_dict
+        assert len(lst) == 1
+        # ensure jobs and batches had different qubits which had to be remapped
+        assert lst[0] != {0: 0, 1: 1, 2: 2, 3: 3, 4: 4}
+        if backend_with_readout_correction.noise_inversion_method != "pseudo_inverse":
+            assert results[0].get_counts() == {"1001": 50}
 
     def test_run_circuitset_and_measure(self, backend):
         # Given

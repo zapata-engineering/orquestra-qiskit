@@ -32,7 +32,7 @@ def test_translation_type_enforcement():
     """
     sample_str = "Z0*Z1"
     sample_int = 1
-    qiskit_op = SummedOp([PauliOp(Pauli.from_label("YXZIX"), 2.25)])
+    qiskit_op = SummedOp([PauliOp(Pauli("YXZIX"), 2.25)])
 
     # don't accept anything other than orquestra PauliSum or PauliTerm
     with pytest.raises(TypeError):
@@ -52,7 +52,7 @@ def test_paulisum_to_qiskitpauli():
     qiskit_op = qubitop_to_qiskitpauli(pauli_term)
 
     ground_truth = (
-        PauliOp(Pauli.from_label("XZX"), 0.5) + PauliOp(Pauli.from_label("YZY"), 0.5)
+        PauliOp(Pauli("XZX"), 0.5) + PauliOp(Pauli("YZY"), 0.5)
     ).to_pauli_op()
 
     assert ground_truth == qiskit_op
@@ -66,7 +66,7 @@ def test_pauliterm_to_qiskitpauli():
 
     qiskit_op = qubitop_to_qiskitpauli(pauli_term)
 
-    ground_truth = SummedOp([PauliOp(Pauli.from_label("YXZIX"), 2.25)])
+    ground_truth = SummedOp([PauliOp(Pauli("YXZIX"), 2.25)])
 
     assert ground_truth == qiskit_op
 
@@ -83,7 +83,7 @@ def test_qiskitpauli_to_qubitop():
     """
     Conversion of qiskit SummedOp to PauliSum; accuracy test
     """
-    qiskit_term = SummedOp([PauliOp(Pauli.from_label("XIIIIY"), coeff=1)])
+    qiskit_term = SummedOp([PauliOp(Pauli("XIIIIY"), coeff=1)])
 
     expected_pauli_term = PauliTerm.from_iterable([("X", 0), ("Y", 5)])
     test_pauli_term = qiskitpauli_to_qubitop(qiskit_term)
