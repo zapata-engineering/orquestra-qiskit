@@ -1,8 +1,9 @@
 import pytest
-from qiskit.providers.aer import AerProvider
+from qiskit import Aer
 
 from orquestra.integrations.qiskit.backend import QiskitRunner
 from orquestra.quantum.api.circuit_runner_contracts import CIRCUIT_RUNNER_CONTRACTS
+from orquestra.quantum.circuits import Circuit, H
 
 
 def _test_id(val):
@@ -32,7 +33,7 @@ COMPATIBLE_BACKENDS = (
     "runner",
     [
         *[
-            QiskitRunner(AerProvider().get_backend(name))
+            QiskitRunner(Aer.get_backend(name))
             for name in COMPATIBLE_BACKENDS
         ]
     ],
@@ -44,3 +45,12 @@ COMPATIBLE_BACKENDS = (
 )
 def test_qiskit_runner_fulfills_circuit_runner_contracts(runner, contract):
     assert contract(runner)
+
+def test_qiskit_runner_can_run_job_with_sample_size_exceeding_backends_limit():
+    backend = Aer.get_backend("aer_simulator_statevector")
+    runner = QiskitRunner(backend)
+    max_shots = backend.configuration().max_shots
+    circuit = Circuit([H(0)])
+
+    measurements = runner.run_and_measure(circuit, n_samples=max_shots+1)
+    assert len(measurements.bitstrings) == max_shots + 1

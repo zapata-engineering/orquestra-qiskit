@@ -3,6 +3,7 @@ from typing import Union, Optional, Sequence
 
 from qiskit import execute, ClassicalRegister, QuantumCircuit
 from qiskit.providers import BackendV1, BackendV2
+from qiskit_aer import AerProvider
 
 from orquestra.integrations.qiskit.conversions import export_to_qiskit
 from orquestra.quantum.api import BaseCircuitRunner
@@ -36,7 +37,7 @@ class QiskitRunner(BaseCircuitRunner):
             optimization_level=0,
             backend_properties=self.backend.properties()
         )
-        return Measurements(job.result().get_counts())
+        return Measurements.from_counts(job.result().get_counts())
 
     def _run_batch_and_measure(self, batch: Sequence[Circuit], samples_per_circuit: Sequence[int]):
         job = execute(
