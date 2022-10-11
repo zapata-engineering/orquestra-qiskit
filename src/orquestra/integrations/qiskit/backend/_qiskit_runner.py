@@ -48,4 +48,14 @@ class QiskitRunner(BaseCircuitRunner):
             backend_properties=self.backend.properties(),
         )
 
-        return combine_measurements(job.result().get_counts(), multiplicities)
+        all_counts = job.result().get_counts()
+        # Qiskit backends return single dictionary with counts when there was
+        # only one experiment. To simplify logic, we make sure to always have a
+        # list.
+        if not isinstance(all_counts, list):
+            all_counts = [all_counts]
+
+        return [
+            Measurements.from_counts(counts)
+            for counts in combine_measurements(all_counts, multiplicities)
+        ]

@@ -64,4 +64,4 @@ def test_qiskit_runner_can_run_job_with_sample_size_exceeding_backends_limit(
     circuit = Circuit([H(0)])
 
     measurements = runner.run_and_measure(circuit, n_samples=max_shots + 1)
-    assert len(measurements.bitstrings) == max_shots + 1
+    assert len(measurements.bitstrings) >= max_shots + 1
