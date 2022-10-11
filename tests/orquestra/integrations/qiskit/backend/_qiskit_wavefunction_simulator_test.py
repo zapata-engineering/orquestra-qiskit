@@ -1,8 +1,7 @@
 import pytest
 from qiskit import Aer
 
-from orquestra.integrations.qiskit.backend._qiskit_wavefunction_simulator  import \
-    QiskitWavefunctionSimulator
+from orquestra.integrations.qiskit.backend import QiskitWavefunctionSimulator
 from orquestra.quantum.api.circuit_runner_contracts import CIRCUIT_RUNNER_CONTRACTS
 from orquestra.quantum.api.wavefunction_simulator_contracts import simulator_contracts_for_tolerance
 

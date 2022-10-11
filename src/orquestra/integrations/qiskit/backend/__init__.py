@@ -3,3 +3,4 @@
 ################################################################################
 from .backend import QiskitBackend
 from ._qiskit_runner import QiskitRunner
+from ._qiskit_wavefunction_simulator import QiskitWavefunctionSimulator
