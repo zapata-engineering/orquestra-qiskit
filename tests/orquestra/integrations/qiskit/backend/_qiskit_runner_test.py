@@ -1,9 +1,16 @@
+import os
+
 import pytest
 from qiskit import Aer, QiskitError
 
-from orquestra.integrations.qiskit.backend import QiskitRunner
+from orquestra.integrations.qiskit.backend import QiskitRunner, QiskitWavefunctionSimulator
+from orquestra.integrations.qiskit.noise import get_qiskit_noise_model
+from orquestra.quantum.api import EstimationTask
 from orquestra.quantum.api.circuit_runner_contracts import CIRCUIT_RUNNER_CONTRACTS
-from orquestra.quantum.circuits import Circuit, H
+from orquestra.quantum.circuits import Circuit, H, X
+from orquestra.quantum.estimation import estimate_expectation_values_by_averaging
+from orquestra.quantum.measurements import ExpectationValues
+from orquestra.quantum.operators import PauliTerm
 
 
 def _test_id(val):
@@ -65,3 +72,41 @@ def test_qiskit_runner_can_run_job_with_sample_size_exceeding_backends_limit(
 
     measurements = runner.run_and_measure(circuit, n_samples=max_shots + 1)
     assert len(measurements.bitstrings) >= max_shots + 1
+
+
+@pytest.fixture(params=["aer_simulator"])
+def noisy_simulator(request):
+    ibmq_api_token = os.getenv("ZAPATA_IBMQ_API_TOKEN")
+    noise_model, connectivity = get_qiskit_noise_model(
+        "ibm_nairobi", api_token=ibmq_api_token
+    )
+    backend = Aer.get_backend(request.param)
+    return QiskitRunner(
+        backend, noise_model=noise_model, device_connectivity=connectivity
+    )
+
+
+def test_initializing_simulator_with_noise_initializes_connectivity_and_basis(
+    noisy_simulator
+):
+    assert noisy_simulator.device_connectivity is not None
+    assert noisy_simulator.basis_gates is not None
+
+
+@pytest.mark.parametrize("num_flips", [10, 50])
+def test_expectation_value_with_noisy_simulator(noisy_simulator, num_flips):
+    # Initialize in |1> state and flip even number of times.
+    # Thus, we and up in |1> state but decoherence is allowed to take effect
+    circuit = Circuit([X(0) for _ in range(num_flips+1)])
+    qubit_operator = PauliTerm("Z0")
+    n_samples = 8192
+
+    estimation_tasks = [EstimationTask(qubit_operator, circuit, n_samples)]
+
+    expectation_values = estimate_expectation_values_by_averaging(
+        noisy_simulator, estimation_tasks
+    )[0]
+
+    assert isinstance(expectation_values, ExpectationValues)
+    assert len(expectation_values.values) == 1
+    assert -1 < expectation_values.values[0] < 0.0
