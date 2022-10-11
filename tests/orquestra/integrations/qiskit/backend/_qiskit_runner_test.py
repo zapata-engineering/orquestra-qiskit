@@ -34,7 +34,7 @@ COMPATIBLE_BACKENDS = (
     "aer_simulator",
     "aer_simulator_statevector",
     "aer_simulator_density_matrix",
-    # "aer_simulator_stabilizer",          # Has limited gateset, cannot run some gates used in contracts
+    # "aer_simulator_stabilizer",          # Has limited gateset
     "aer_simulator_matrix_product_state",
     "aer_simulator_extended_stabilizer",
     # "aer_simulator_unitary",             # Does not support measurements
