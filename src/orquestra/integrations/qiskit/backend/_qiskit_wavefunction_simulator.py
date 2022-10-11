@@ -22,13 +22,14 @@ class QiskitWavefunctionSimulator(BaseWavefunctionSimulator):
         noise_model: Optional[NoiseModel] = None,
         device_connectivity: Optional[CircuitConnectivity] = None,
         basis_gates: Optional[List[str]] = None,
-
+        optimization_level: int = 0,
         seed: Optional[int] = None
     ):
         super().__init__()
         self.seed = seed
         self.backend = qiskit_backend
         self.noise_model = noise_model
+        self.optimization_level = optimization_level
 
         self.basis_gates = (
             noise_model.basis_gates
@@ -62,6 +63,7 @@ class QiskitWavefunctionSimulator(BaseWavefunctionSimulator):
             noise_model=self.noise_model,
             coupling_map=coupling_map,
             basis_gates=self.basis_gates,
+            optimization_level=self.optimization_level,
             seed_simulator=self.seed,
             seed_transpiler=self.seed,
         )
