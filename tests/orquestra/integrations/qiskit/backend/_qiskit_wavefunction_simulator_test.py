@@ -4,6 +4,7 @@ from qiskit import Aer
 from orquestra.integrations.qiskit.backend import QiskitWavefunctionSimulator
 from orquestra.quantum.api.circuit_runner_contracts import CIRCUIT_RUNNER_CONTRACTS
 from orquestra.quantum.api.wavefunction_simulator_contracts import simulator_contracts_for_tolerance
+from orquestra.quantum.circuits import Circuit, X, CNOT
 
 STATEVECTOR_BACKENDS = ["aer_simulator_statevector", "statevector_simulator"]
 
@@ -29,3 +30,30 @@ def test_qiskit_wf_simulator_fulfills_wf_simulator_contracts(
     simulator, contract
 ):
     assert contract(simulator)
+
+
+def test_running_batch_with_single_circuit_gives_correct_measurements(simulator):
+    circuit = Circuit([X(0), CNOT(1, 2)])
+
+    measurements_set = simulator.run_batch_and_measure([circuit], [100])
+
+    assert len(measurements_set) == 1
+    for measurements in measurements_set:
+        assert len(measurements.bitstrings) == 100
+        assert all(bitstring == (1, 0, 0) for bitstring in measurements.bitstrings)
+
+
+def test_running_batch_with_many_circuits_gives_correct_measurements(simulator):
+    n_circuits = 50
+    n_samples = 100
+    circuit = Circuit([X(0), CNOT(1, 2)])
+
+    measurements_set = simulator.run_batch_and_measure(
+        [circuit] * n_circuits, [n_samples] * n_circuits
+    )
+
+    assert len(measurements_set) == n_circuits
+
+    for measurements in measurements_set:
+        assert len(measurements.bitstrings) == n_samples
+        assert all(bitstring == (1, 0, 0) for bitstring in measurements.bitstrings)
