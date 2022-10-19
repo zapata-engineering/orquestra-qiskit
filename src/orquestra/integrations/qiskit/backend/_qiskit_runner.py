@@ -32,7 +32,8 @@ class QiskitRunner(BaseCircuitRunner):
         device_connectivity: Optional[CircuitConnectivity] = None,  # Throw away
         basis_gates: Optional[List[str]] = None,
         optimization_level: int = 0,
-        seed: Optional[int] = None
+        seed: Optional[int] = None,
+        execute_function=execute
     ):
         super().__init__()
         self.backend = qiskit_backend
@@ -49,6 +50,7 @@ class QiskitRunner(BaseCircuitRunner):
         )
 
         self.device_connectivity = device_connectivity
+        self._execute = execute_function
 
     def _run_and_measure(self, circuit: Circuit, n_samples: int) -> Measurements:
         return self._run_batch_and_measure([circuit], [n_samples])[0]
@@ -72,7 +74,7 @@ class QiskitRunner(BaseCircuitRunner):
             CouplingMap(self.device_connectivity.connectivity)
         )
 
-        job = execute(
+        job = self._execute(
             new_circuits,
             backend=self.backend,
             shots=max(new_n_samples),
