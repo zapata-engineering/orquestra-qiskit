@@ -4,6 +4,7 @@ import pytest
 
 from orquestra.integrations.qiskit.backend._ibmq_runner import create_ibmq_runner
 from orquestra.quantum.api.circuit_runner_contracts import CIRCUIT_RUNNER_CONTRACTS
+from orquestra.quantum.circuits import Circuit, H, CNOT
 
 
 @pytest.fixture(scope="module")
@@ -16,5 +17,19 @@ def ibmq_runner():
 
 
 @pytest.mark.parametrize("contract", CIRCUIT_RUNNER_CONTRACTS)
-def test_qiskit_runner_fulfills_circuit_runner_contracts(ibmq_runner, contract):
+def test_ibmq_runner_fulfills_circuit_runner_contracts(ibmq_runner, contract):
     assert contract(ibmq_runner)
+
+
+def test_ibmq_runner_can_run_batches_larger_then_natively_supported_by_backend(
+    ibmq_runner
+):
+    max_native_batch_size = ibmq_runner.backend.configuration().max_experiments
+
+    circuits = [
+        Circuit([H(0), CNOT(0, 1)])
+        for _ in range(max_native_batch_size + max_native_batch_size // 2)
+    ]
+
+    result = ibmq_runner.run_batch_and_measure(circuits, 1000)
+    assert len(result) == len(circuits)
