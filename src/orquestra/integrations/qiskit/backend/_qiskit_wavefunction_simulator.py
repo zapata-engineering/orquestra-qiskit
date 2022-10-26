@@ -8,7 +8,7 @@ from qiskit_aer.noise import NoiseModel
 from orquestra.integrations.qiskit.backend._qiskit_runner import AnyQiskitBackend
 from orquestra.integrations.qiskit.conversions import export_to_qiskit
 from orquestra.quantum.api.backend import StateVector
-from orquestra.quantum.api.simulator import BaseWavefunctionSimulator
+from orquestra.quantum.api.wavefunction_simulator import BaseWavefunctionSimulator
 from orquestra.quantum.circuits import Circuit
 from orquestra.quantum.circuits.layouts import CircuitConnectivity
 from orquestra.quantum.wavefunction import flip_amplitudes
