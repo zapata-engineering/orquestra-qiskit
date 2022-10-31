@@ -32,7 +32,7 @@ class QiskitRunner(BaseCircuitRunner):
         self,
         qiskit_backend: AnyQiskitBackend,
         noise_model: Optional[NoiseModel] = None,
-        device_connectivity: Optional[CircuitConnectivity] = None,  # Throw away
+        coupling_map: Optional[CouplingMap] = None,
         basis_gates: Optional[List[str]] = None,
         optimization_level: int = 0,
         seed: Optional[int] = None,
@@ -52,7 +52,7 @@ class QiskitRunner(BaseCircuitRunner):
             else basis_gates
         )
 
-        self.device_connectivity = device_connectivity
+        self.coupling_map = coupling_map
         self._execute = execute_function
 
     def _run_and_measure(self, circuit: Circuit, n_samples: int) -> Measurements:
@@ -81,19 +81,13 @@ class QiskitRunner(BaseCircuitRunner):
             batch_size
         )
 
-        coupling_map = (
-            None if self.device_connectivity is None
-            else
-            CouplingMap(self.device_connectivity.connectivity)
-        )
-
         jobs = [
             self._execute(
                 list(circuits),
                 backend=self.backend,
                 shots=n_samples,
                 noise_model=self.noise_model,
-                coupling_map=coupling_map,
+                coupling_map=self.coupling_map,
                 basis_gates=self.basis_gates,
                 optimization_level=self.optimization_level,
                 seed_simulator=self.seed,

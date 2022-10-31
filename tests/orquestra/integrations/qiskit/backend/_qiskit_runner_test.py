@@ -1,13 +1,15 @@
 import os
+from unittest.mock import Mock
 
 import pytest
-from qiskit import Aer, QiskitError
+from qiskit import Aer, QiskitError, execute
+from qiskit.transpiler import CouplingMap
 
-from orquestra.integrations.qiskit.backend import QiskitRunner, QiskitWavefunctionSimulator
+from orquestra.integrations.qiskit.backend import QiskitRunner
 from orquestra.integrations.qiskit.noise import get_qiskit_noise_model
 from orquestra.quantum.api import EstimationTask
 from orquestra.quantum.api.circuit_runner_contracts import CIRCUIT_RUNNER_CONTRACTS
-from orquestra.quantum.circuits import Circuit, H, X
+from orquestra.quantum.circuits import Circuit, H, X, CNOT
 from orquestra.quantum.estimation import estimate_expectation_values_by_averaging
 from orquestra.quantum.measurements import ExpectationValues
 from orquestra.quantum.operators import PauliTerm
@@ -82,7 +84,7 @@ def noisy_simulator(request):
     )
     backend = Aer.get_backend(request.param)
     return QiskitRunner(
-        backend, noise_model=noise_model, device_connectivity=connectivity
+        backend, noise_model=noise_model, coupling_map=connectivity
     )
 
 
@@ -110,3 +112,19 @@ def test_expectation_value_with_noisy_simulator(noisy_simulator, num_flips):
     assert isinstance(expectation_values, ExpectationValues)
     assert len(expectation_values.values) == 1
     assert -1 < expectation_values.values[0] < 0.0
+
+
+def test_qiskit_runner_passes_coupling_map_to_execute_function():
+    circuit = Circuit([X(0), CNOT(1, 2)])
+
+    coupling_map = CouplingMap([(0, 2), (0, 1)])
+    execute_func = Mock(wraps=execute)
+
+    runner = QiskitRunner(
+        Aer.get_backend("statevector_simulator"),
+        coupling_map=coupling_map,
+        execute_function=execute_func
+    )
+
+    runner.run_and_measure(circuit, n_samples=10)
+    assert execute_func.call_args.kwargs["coupling_map"] == coupling_map
