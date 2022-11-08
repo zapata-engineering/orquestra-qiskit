@@ -79,8 +79,9 @@ class QiskitBackend(QuantumBackend):
                 ):
                     raise RuntimeError(e)
 
+        self.provider = None
         try:
-            provider = IBMQ.get_provider(hub=hub, group=group, project=project)
+            self.provider = IBMQ.get_provider(hub=hub, group=group, project=project)
         except IBMQProviderError as e:
             if api_token is None:
                 raise RuntimeError("No providers were found. Missing IBMQ API token?")
