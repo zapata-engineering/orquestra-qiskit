@@ -40,7 +40,7 @@ class TestBasic(unittest.TestCase):
 
             # Then
             self.assertIsInstance(noise_model, AerNoise.NoiseModel)
-            self.assertIsInstance(coupling_map, CircuitConnectivity)
+            self.assertIsInstance(coupling_map, list)
 
     def test_get_qiskit_noise_model_no_device(self):
         # Given
