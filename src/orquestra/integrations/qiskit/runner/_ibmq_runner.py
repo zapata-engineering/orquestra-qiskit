@@ -6,7 +6,7 @@ from qiskit import execute, IBMQ
 from qiskit.providers.ibmq import IBMQBackendJobLimitError, IBMQAccountError
 from qiskit_aer.noise import NoiseModel
 
-from orquestra.integrations.qiskit.backend import QiskitRunner
+from orquestra.integrations.qiskit.runner import QiskitRunner
 
 
 def _execute_on_ibmq_with_retries(

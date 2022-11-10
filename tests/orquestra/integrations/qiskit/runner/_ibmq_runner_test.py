@@ -2,7 +2,7 @@ import os
 
 import pytest
 
-from orquestra.integrations.qiskit.backend._ibmq_runner import create_ibmq_runner
+from orquestra.integrations.qiskit.runner import create_ibmq_runner
 from orquestra.quantum.api.circuit_runner_contracts import CIRCUIT_RUNNER_CONTRACTS
 from orquestra.quantum.circuits import Circuit, H, CNOT
 

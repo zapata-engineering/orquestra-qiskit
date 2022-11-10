@@ -5,7 +5,7 @@ from qiskit import QuantumCircuit, execute
 from qiskit.transpiler import CouplingMap
 from qiskit_aer.noise import NoiseModel
 
-from orquestra.integrations.qiskit.backend._qiskit_runner import AnyQiskitBackend
+from orquestra.integrations.qiskit.runner._qiskit_runner import AnyQiskitBackend
 from orquestra.integrations.qiskit.conversions import export_to_qiskit
 from orquestra.quantum.api.wavefunction_simulator import BaseWavefunctionSimulator
 from orquestra.quantum.circuits import Circuit

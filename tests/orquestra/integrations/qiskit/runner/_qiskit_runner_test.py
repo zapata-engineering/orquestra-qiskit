@@ -5,7 +5,7 @@ import pytest
 from qiskit import Aer, QiskitError, execute
 from qiskit.transpiler import CouplingMap
 
-from orquestra.integrations.qiskit.backend import QiskitRunner
+from orquestra.integrations.qiskit.runner import QiskitRunner
 from orquestra.integrations.qiskit.noise import get_qiskit_noise_model
 from orquestra.quantum.api import EstimationTask
 from orquestra.quantum.api.circuit_runner_contracts import CIRCUIT_RUNNER_CONTRACTS
@@ -86,13 +86,6 @@ def noisy_simulator(request):
     return QiskitRunner(
         backend, noise_model=noise_model, coupling_map=connectivity
     )
-
-
-def test_initializing_simulator_with_noise_initializes_connectivity_and_basis(
-    noisy_simulator
-):
-    assert noisy_simulator.device_connectivity is not None
-    assert noisy_simulator.basis_gates is not None
 
 
 @pytest.mark.parametrize("num_flips", [10, 50])

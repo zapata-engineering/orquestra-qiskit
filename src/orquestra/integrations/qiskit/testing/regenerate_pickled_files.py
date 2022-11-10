@@ -6,7 +6,7 @@ import pickle
 
 from orquestra.quantum.circuits import CNOT, Circuit, X
 
-from orquestra.integrations.qiskit.backend import QiskitBackend
+from orquestra.integrations.qiskit.runner import QiskitBackend
 
 token = "YOUR_TOKEN_HERE"
 file_path = os.path.dirname(os.path.realpath(__file__))
