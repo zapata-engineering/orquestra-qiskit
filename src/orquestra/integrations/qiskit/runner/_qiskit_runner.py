@@ -96,7 +96,7 @@ class QiskitRunner(BaseCircuitRunner):
             for circuits, n_samples in batches
         ]
 
-        # Qiskit backends return single dictionary with counts when there was
+        # Qiskit runners return single dictionary with counts when there was
         # only one experiment. To simplify logic, we make sure to always have a
         # list of counts from a job.
         all_counts = [
