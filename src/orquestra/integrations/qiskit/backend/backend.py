@@ -88,7 +88,7 @@ class QiskitBackend(QuantumBackend):
             else:
                 raise RuntimeError(e)
 
-        self.device = provider.get_backend(name=self.device_name)
+        self.device = self.provider.get_backend(name=self.device_name)
         self.max_shots = self.device.configuration().max_shots
         self.batch_size: int = self.device.configuration().max_experiments
         self.supports_batching = True
