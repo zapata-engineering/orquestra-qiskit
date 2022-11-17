@@ -3,7 +3,8 @@ from qiskit import Aer
 
 from orquestra.integrations.qiskit.simulator import QiskitWavefunctionSimulator
 from orquestra.quantum.api.circuit_runner_contracts import CIRCUIT_RUNNER_CONTRACTS
-from orquestra.quantum.api.wavefunction_simulator_contracts import simulator_contracts_for_tolerance
+from orquestra.quantum.api.wavefunction_simulator_contracts import \
+    simulator_contracts_for_tolerance, simulator_contracts_with_nontrivial_initial_state
 from orquestra.quantum.circuits import Circuit, X, CNOT
 
 STATEVECTOR_BACKENDS = ["aer_simulator_statevector", "statevector_simulator"]
@@ -25,7 +26,11 @@ def test_qiskit_wavefucntion_simulator_fulfills_circuit_runner_contracts(
     assert contract(simulator)
 
 
-@pytest.mark.parametrize("contract", simulator_contracts_for_tolerance())
+@pytest.mark.parametrize(
+    "contract",
+    simulator_contracts_for_tolerance() +
+    simulator_contracts_with_nontrivial_initial_state()
+)
 def test_qiskit_wf_simulator_fulfills_wf_simulator_contracts(
     simulator, contract
 ):
