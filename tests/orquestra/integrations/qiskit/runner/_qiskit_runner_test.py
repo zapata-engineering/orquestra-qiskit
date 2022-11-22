@@ -49,11 +49,11 @@ COMPATIBLE_BACKENDS = (
     "aer_simulator_density_matrix",
     # "aer_simulator_stabilizer",          # Has limited gateset
     "aer_simulator_matrix_product_state",
-    "aer_simulator_extended_stabilizer",
+    # "aer_simulator_extended_stabilizer", # Technically compatible, incredibly slow
     # "aer_simulator_unitary",             # Does not support measurements
     # "aer_simulator_superop",             # Does not support measurements
-    "qasm_simulator",
-    "statevector_simulator",
+    # "qasm_simulator",                    # Compatible, but deprecated
+    # "statevector_simulator",             # Compatible, but deprecated
     # "unitary_simulator",                 # Does not support measurements
     # "pulse_simulator"                    # Does not support measurements
 )
@@ -66,6 +66,29 @@ COMPATIBLE_BACKENDS = (
 )
 @pytest.mark.parametrize("contract", CIRCUIT_RUNNER_CONTRACTS)
 def test_qiskit_runner_fulfills_circuit_runner_contracts(runner, contract):
+    assert contract(runner)
+
+
+@pytest.mark.parametrize(
+    "contract",
+    circuit_runner_gate_compatibility_contracts(
+        gates_to_exclude=["RH", "XY"], exp_val_spread=1.2
+    ),
+)
+@pytest.mark.parametrize(
+    "runner",
+    [
+        *[
+            QiskitRunner(
+                Aer.get_backend(name),
+                execute_function=partial(execute, seed_simulator=1234),
+            )
+            for name in COMPATIBLE_BACKENDS
+        ]
+    ],
+    ids=_test_id,
+)
+def test_qiskit_runner_uses_correct_gate_definitions(runner, contract):
     assert contract(runner)
 
 
