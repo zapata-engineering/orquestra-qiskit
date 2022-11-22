@@ -25,7 +25,7 @@ class QiskitWavefunctionSimulator(BaseWavefunctionSimulator):
         device_connectivity: Optional[CircuitConnectivity] = None,
         basis_gates: Optional[List[str]] = None,
         optimization_level: int = 0,
-        seed: Optional[int] = None
+        seed: Optional[int] = None,
     ):
         super().__init__()
         self.seed = seed
