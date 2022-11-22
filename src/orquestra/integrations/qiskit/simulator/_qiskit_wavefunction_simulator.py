@@ -1,24 +1,23 @@
 ################################################################################
 # © Copyright 2022 Zapata Computing Inc.
 ################################################################################
-from typing import Optional, List
+from typing import List, Optional
 
 import numpy as np
-from qiskit import QuantumCircuit, execute
-from qiskit.transpiler import CouplingMap
-from qiskit_aer.noise import NoiseModel
-
-from orquestra.integrations.qiskit.runner._qiskit_runner import AnyQiskitBackend
-from orquestra.integrations.qiskit.conversions import export_to_qiskit
 from orquestra.quantum.api.wavefunction_simulator import BaseWavefunctionSimulator
 from orquestra.quantum.circuits import Circuit
 from orquestra.quantum.circuits.layouts import CircuitConnectivity
 from orquestra.quantum.typing import StateVector
 from orquestra.quantum.wavefunction import flip_amplitudes
+from qiskit import QuantumCircuit, execute
+from qiskit.transpiler import CouplingMap
+from qiskit_aer.noise import NoiseModel
+
+from orquestra.integrations.qiskit.conversions import export_to_qiskit
+from orquestra.integrations.qiskit.runner._qiskit_runner import AnyQiskitBackend
 
 
 class QiskitWavefunctionSimulator(BaseWavefunctionSimulator):
-
     def __init__(
         self,
         qiskit_backend: AnyQiskitBackend,
@@ -47,7 +46,7 @@ class QiskitWavefunctionSimulator(BaseWavefunctionSimulator):
     ):
         qiskit_circuit = export_to_qiskit(circuit)
 
-        if not np.array_equal(initial_state, [1] + [0] * (2 ** circuit.n_qubits - 1)):
+        if not np.array_equal(initial_state, [1] + [0] * (2**circuit.n_qubits - 1)):
             state_prep_circuit = QuantumCircuit(circuit.n_qubits)
             state_prep_circuit.initialize(flip_amplitudes(initial_state))
             qiskit_circuit = state_prep_circuit.compose(qiskit_circuit)
@@ -55,9 +54,9 @@ class QiskitWavefunctionSimulator(BaseWavefunctionSimulator):
         qiskit_circuit.save_state()
 
         coupling_map = (
-            None if self.device_connectivity is None
-            else
-            CouplingMap(self.device_connectivity.connectivity)
+            None
+            if self.device_connectivity is None
+            else CouplingMap(self.device_connectivity.connectivity)
         )
 
         job = execute(
@@ -71,6 +70,6 @@ class QiskitWavefunctionSimulator(BaseWavefunctionSimulator):
             seed_transpiler=self.seed,
         )
 
-        return flip_amplitudes(job.result().get_statevector(
-            qiskit_circuit, decimals=20
-        ).data)
+        return flip_amplitudes(
+            job.result().get_statevector(qiskit_circuit, decimals=20).data
+        )

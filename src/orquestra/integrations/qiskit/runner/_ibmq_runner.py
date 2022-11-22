@@ -1,12 +1,12 @@
 import sys
 import time
-from typing import Optional, List
+from typing import List, Optional
 
-from qiskit import execute, IBMQ
-from qiskit.providers.ibmq import IBMQBackendJobLimitError, IBMQAccountError
+from qiskit import IBMQ, execute
+from qiskit.providers.ibmq import IBMQAccountError, IBMQBackendJobLimitError
 from qiskit_aer.noise import NoiseModel
 
-from orquestra.integrations.qiskit.runner import QiskitRunner
+from ._qiskit_runner import QiskitRunner
 
 
 def _execute_on_ibmq_with_retries(
@@ -21,9 +21,9 @@ def _execute_on_ibmq_with_retries(
                 print(f"Job limit reached. Retrying in {retry_delay_seconds}s.")
                 time.sleep(retry_delay_seconds)
         raise RuntimeError(
-            f"Failed to submit job in {elapsed_seconds}s due to backend job "
-            "limit."
+            f"Failed to submit job in {elapsed_seconds}s due to backend job " "limit."
         )
+
     return _execute
 
 
@@ -31,19 +31,22 @@ def create_ibmq_runner(
     api_token: str,
     backend_name: str,
     hub: str = "ibm-q",
-    group: str = "open" ,
+    group: str = "open",
     project: str = "main",
     noise_model: Optional[NoiseModel] = None,
     basis_gates: Optional[List[str]] = None,
     optimization_level: int = 0,
     seed: Optional[int] = None,
     retry_delay_seconds: int = 60,
-    retry_timeout_seconds: int = 24 * 60 * 60, # default timeout of one day
+    retry_timeout_seconds: int = 24 * 60 * 60,  # default timeout of one day
 ):
     try:
         IBMQ.enable_account(api_token)
     except IBMQAccountError as e:
-        if e.message != "An IBM Quantum Experience account is already in use for the session.":
+        if (
+            e.message
+            != "An IBM Quantum Experience account is already in use for the session."
+        ):
             raise e
 
     provider = IBMQ.get_provider(hub=hub, group=group, project=project)
@@ -57,5 +60,5 @@ def create_ibmq_runner(
         seed=seed,
         execute_function=_execute_on_ibmq_with_retries(
             retry_delay_seconds, retry_timeout_seconds
-        )
+        ),
     )

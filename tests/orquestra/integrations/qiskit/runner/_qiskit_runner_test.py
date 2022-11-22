@@ -1,18 +1,22 @@
 import os
+from functools import partial
 from unittest.mock import Mock
 
 import pytest
-from qiskit import Aer, QiskitError, execute
-from qiskit.transpiler import CouplingMap
-
-from orquestra.integrations.qiskit.runner import QiskitRunner
-from orquestra.integrations.qiskit.noise import get_qiskit_noise_model
 from orquestra.quantum.api import EstimationTask
-from orquestra.quantum.api.circuit_runner_contracts import CIRCUIT_RUNNER_CONTRACTS
-from orquestra.quantum.circuits import Circuit, H, X, CNOT
+from orquestra.quantum.api.circuit_runner_contracts import (
+    CIRCUIT_RUNNER_CONTRACTS,
+    circuit_runner_gate_compatibility_contracts,
+)
+from orquestra.quantum.circuits import CNOT, Circuit, H, X
 from orquestra.quantum.estimation import estimate_expectation_values_by_averaging
 from orquestra.quantum.measurements import ExpectationValues
 from orquestra.quantum.operators import PauliTerm
+from qiskit import Aer, QiskitError, execute
+from qiskit.transpiler import CouplingMap
+
+from orquestra.integrations.qiskit.noise import get_qiskit_noise_model
+from orquestra.integrations.qiskit.runner import QiskitRunner
 
 
 def _test_id(val):
@@ -83,16 +87,14 @@ def noisy_simulator(request):
         "ibm_nairobi", api_token=ibmq_api_token
     )
     backend = Aer.get_backend(request.param)
-    return QiskitRunner(
-        backend, noise_model=noise_model, coupling_map=connectivity
-    )
+    return QiskitRunner(backend, noise_model=noise_model, coupling_map=connectivity)
 
 
 @pytest.mark.parametrize("num_flips", [10, 50])
 def test_expectation_value_with_noisy_simulator(noisy_simulator, num_flips):
     # Initialize in |1> state and flip even number of times.
     # Thus, we and up in |1> state but decoherence is allowed to take effect
-    circuit = Circuit([X(0) for _ in range(num_flips+1)])
+    circuit = Circuit([X(0) for _ in range(num_flips + 1)])
     qubit_operator = PauliTerm("Z0")
     n_samples = 8192
 
@@ -116,7 +118,7 @@ def test_qiskit_runner_passes_coupling_map_to_execute_function():
     runner = QiskitRunner(
         Aer.get_backend("statevector_simulator"),
         coupling_map=coupling_map,
-        execute_function=execute_func
+        execute_function=execute_func,
     )
 
     runner.run_and_measure(circuit, n_samples=10)
