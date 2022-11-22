@@ -103,7 +103,9 @@ class QiskitRunner(BaseCircuitRunner):
         ]
 
         combined_measurement_counts = [
-            Measurements.from_counts(counts)
+            Measurements.from_counts(
+                {key[::-1]: value for key, value in counts.items()}
+            )
             for counts in combine_measurement_counts(all_counts, multiplicities)
         ]
 
