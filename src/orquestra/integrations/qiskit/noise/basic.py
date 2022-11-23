@@ -5,7 +5,6 @@ from typing import Dict, Optional, Tuple
 
 import numpy as np
 import qiskit.providers.aer.noise as AerNoise
-from orquestra.quantum.circuits.layouts import CircuitConnectivity
 from qiskit.providers.aer.noise import (
     NoiseModel,
     amplitude_damping_error,
@@ -16,6 +15,7 @@ from qiskit.providers.aer.noise import (
 from qiskit.providers.ibmq import IBMQ
 from qiskit.providers.ibmq.exceptions import IBMQAccountError, IBMQProviderError
 from qiskit.quantum_info import Kraus
+from qiskit.transpiler import CouplingMap
 
 
 def get_qiskit_noise_model(
@@ -24,7 +24,7 @@ def get_qiskit_noise_model(
     group: str = "open",
     project: str = "main",
     api_token: Optional[str] = None,
-) -> Tuple[NoiseModel, CircuitConnectivity]:
+) -> Tuple[NoiseModel, list]:
     """Get a qiskit noise model to use noisy simulations with a qiskit simulator
 
     Args:
@@ -57,9 +57,8 @@ def get_qiskit_noise_model(
 
     noisy_device = provider.get_backend(device_name)
     noise_model = AerNoise.NoiseModel.from_backend(noisy_device)
-    coupling_map = noisy_device.configuration().coupling_map
 
-    return noise_model, CircuitConnectivity(coupling_map)
+    return noise_model, noisy_device.configuration().coupling_map
 
 
 def create_amplitude_damping_noise(T_1: float, t_step: float = 10e-9) -> NoiseModel:
