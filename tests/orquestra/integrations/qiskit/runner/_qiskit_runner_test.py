@@ -72,7 +72,7 @@ def test_qiskit_runner_fulfills_circuit_runner_contracts(runner, contract):
 @pytest.mark.parametrize(
     "contract",
     circuit_runner_gate_compatibility_contracts(
-        gates_to_exclude=["RH", "XY"], exp_val_spread=1.2
+        gates_to_exclude=["RH", "XY"], exp_val_spread=1.5
     ),
 )
 @pytest.mark.parametrize(
