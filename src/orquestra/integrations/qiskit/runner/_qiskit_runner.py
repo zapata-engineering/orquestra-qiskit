@@ -1,13 +1,12 @@
 from typing import List, Optional, Sequence, Union
 
 from orquestra.quantum.api import BaseCircuitRunner
-from orquestra.quantum.circuits import Circuit
 from orquestra.quantum.circuits import (
+    Circuit,
     combine_measurement_counts,
     expand_sample_sizes,
     split_into_batches,
 )
-
 from orquestra.quantum.measurements import Measurements
 from qiskit import ClassicalRegister, QuantumCircuit, execute
 from qiskit.providers import BackendV1, BackendV2
