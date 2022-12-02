@@ -57,6 +57,8 @@ ORQUESTRA_QISKIT_GATE_MAP = {
     _builtin_gates.ZZ: qiskit.circuit.library.RZZGate,
     _builtin_gates.U3: qiskit.circuit.library.U3Gate,
     _builtin_gates.Delay: qiskit.circuit.Delay,
+    _builtin_gates.S.dagger: qiskit.extensions.SdgGate,
+    _builtin_gates.T.dagger: qiskit.extensions.TdgGate,
 }
 
 
