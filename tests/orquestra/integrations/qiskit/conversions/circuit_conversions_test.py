@@ -28,6 +28,8 @@ EQUIVALENT_NON_PARAMETRIC_GATES = [
     (_builtin_gates.CZ, qiskit.extensions.CZGate()),
     (_builtin_gates.SWAP, qiskit.extensions.SwapGate()),
     (_builtin_gates.ISWAP, qiskit.extensions.iSwapGate()),
+    (_builtin_gates.S.dagger, qiskit.extensions.SdgGate()),
+    (_builtin_gates.T.dagger, qiskit.extensions.TdgGate()),
 ]
 
 EQUIVALENT_PARAMETRIC_GATES = [
