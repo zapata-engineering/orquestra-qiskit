@@ -23,6 +23,7 @@ class QiskitWavefunctionSimulator(BaseWavefunctionSimulator):
     Note that this simulator only works with backends that supports save_state
     instruction.
     """
+
     def __init__(
         self,
         qiskit_backend: AnyQiskitBackend,
