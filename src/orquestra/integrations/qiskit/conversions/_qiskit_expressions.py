@@ -2,12 +2,6 @@
 # © Copyright 2021-2022 Zapata Computing Inc.
 ################################################################################
 """Translations between Qiskit parameter expressions and intermediate expression trees.
-
-Attributes:
-    QISKIT_DIALECT: Mapping from the intermediate expression tree into atoms
-        used in Qiskit symbolic expressions. Allows translating an expression
-        into the Qiskit dialect. Can be used with
-        `orquestra.quantum.circuits.symbolic.translations.translate_expression`.
 """
 import operator
 from functools import lru_cache, reduce, singledispatch
@@ -81,3 +75,8 @@ QISKIT_DIALECT = ExpressionDialect(
         "pow": integer_pow,
     },
 )
+"""Mapping from the intermediate expression tree into Qiskit symbolic expression atoms.
+        
+Allows translating an expression into the Qiskit dialect. Can be used with
+`orquestra.quantum.circuits.symbolic.translations.translate_expression`.
+"""

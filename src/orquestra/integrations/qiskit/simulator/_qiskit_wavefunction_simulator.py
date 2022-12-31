@@ -18,6 +18,11 @@ from orquestra.integrations.qiskit.runner._qiskit_runner import AnyQiskitBackend
 
 
 class QiskitWavefunctionSimulator(BaseWavefunctionSimulator):
+    """Wavefunction simulator using Qiskit backends.
+
+    Note that this simulator only works with backends that supports save_state
+    instruction.
+    """
     def __init__(
         self,
         qiskit_backend: AnyQiskitBackend,
