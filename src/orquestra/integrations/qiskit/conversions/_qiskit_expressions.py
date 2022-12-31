@@ -76,7 +76,7 @@ QISKIT_DIALECT = ExpressionDialect(
     },
 )
 """Mapping from the intermediate expression tree into Qiskit symbolic expression atoms.
-        
+
 Allows translating an expression into the Qiskit dialect. Can be used with
 `orquestra.quantum.circuits.symbolic.translations.translate_expression`.
 """
