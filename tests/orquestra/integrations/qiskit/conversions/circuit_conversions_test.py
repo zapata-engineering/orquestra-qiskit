@@ -194,6 +194,20 @@ EQUIVALENT_NON_PARAMETRIZED_CIRCUITS = [
     (
         _circuit.Circuit(
             [
+                _builtin_gates.T.dagger(0),
+            ],
+            6,
+        ),
+        _make_qiskit_circuit(
+            6,
+            [
+                ("tdg", (0,)),
+            ],
+        ),
+    ),
+    (
+        _circuit.Circuit(
+            [
                 _builtin_gates.CNOT(0, 1),
             ],
             4,
@@ -531,14 +545,6 @@ class TestExportingToQiskit:
             f"Converted circuit:\n{_draw_qiskit_circuit(bound_converted)}\n isn't "
             f"equal to\n{_draw_qiskit_circuit(ref_bound)}"
         )
-
-    def test_converting_circuit_with_daggers_fails_explicitly(self):
-        # NOTE: Qiskit doesn't natively support dagger gates
-        orquestra_circuit = _circuit.Circuit(
-            [_builtin_gates.X.dagger(2), _builtin_gates.T.dagger(1)], 3
-        )
-        with pytest.raises(NotImplementedError):
-            export_to_qiskit(orquestra_circuit)
 
     @pytest.mark.parametrize(
         "orquestra_circuit, qiskit_circuit", EQUIVALENT_CUSTOM_GATE_CIRCUITS
