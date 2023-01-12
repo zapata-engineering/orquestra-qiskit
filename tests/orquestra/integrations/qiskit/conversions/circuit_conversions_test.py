@@ -6,11 +6,12 @@ import pytest
 import qiskit
 import qiskit.circuit.random
 import sympy
+from orquestra.quantum.circuits import _builtin_gates, _circuit, _gates
+
 from orquestra.integrations.qiskit.conversions import (
     export_to_qiskit,
     import_from_qiskit,
 )
-from orquestra.quantum.circuits import _builtin_gates, _circuit, _gates
 
 # --------- gates ---------
 
