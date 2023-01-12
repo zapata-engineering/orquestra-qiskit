@@ -194,6 +194,20 @@ EQUIVALENT_NON_PARAMETRIZED_CIRCUITS = [
     (
         _circuit.Circuit(
             [
+                _builtin_gates.T.dagger(0),
+            ],
+            6,
+        ),
+        _make_qiskit_circuit(
+            6,
+            [
+                ("tdg", (0,)),
+            ],
+        ),
+    ),
+    (
+        _circuit.Circuit(
+            [
                 _builtin_gates.CNOT(0, 1),
             ],
             4,
