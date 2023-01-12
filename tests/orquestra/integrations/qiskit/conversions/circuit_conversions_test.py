@@ -6,12 +6,11 @@ import pytest
 import qiskit
 import qiskit.circuit.random
 import sympy
-from orquestra.quantum.circuits import _builtin_gates, _circuit, _gates
-
 from orquestra.integrations.qiskit.conversions import (
     export_to_qiskit,
     import_from_qiskit,
 )
+from orquestra.quantum.circuits import _builtin_gates, _circuit, _gates
 
 # --------- gates ---------
 
@@ -531,14 +530,6 @@ class TestExportingToQiskit:
             f"Converted circuit:\n{_draw_qiskit_circuit(bound_converted)}\n isn't "
             f"equal to\n{_draw_qiskit_circuit(ref_bound)}"
         )
-
-    def test_converting_circuit_with_daggers_fails_explicitly(self):
-        # NOTE: Qiskit doesn't natively support dagger gates
-        orquestra_circuit = _circuit.Circuit(
-            [_builtin_gates.X.dagger(2), _builtin_gates.T.dagger(1)], 3
-        )
-        with pytest.raises(NotImplementedError):
-            export_to_qiskit(orquestra_circuit)
 
     @pytest.mark.parametrize(
         "orquestra_circuit, qiskit_circuit", EQUIVALENT_CUSTOM_GATE_CIRCUITS

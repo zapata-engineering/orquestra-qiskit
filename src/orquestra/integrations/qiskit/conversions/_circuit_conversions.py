@@ -57,8 +57,6 @@ ORQUESTRA_QISKIT_GATE_MAP = {
     _builtin_gates.ZZ: qiskit.circuit.library.RZZGate,
     _builtin_gates.U3: qiskit.circuit.library.U3Gate,
     _builtin_gates.Delay: qiskit.circuit.Delay,
-    _builtin_gates.S.dagger: qiskit.extensions.SdgGate,
-    _builtin_gates.T.dagger: qiskit.extensions.TdgGate,
 }
 
 
@@ -120,6 +118,13 @@ def _export_gate_to_qiskit(gate, applied_qubit_indices, q_register, custom_names
         pass
 
     try:
+        return _export_dagger_gate(
+            gate, applied_qubit_indices, q_register, custom_names
+        )
+    except ValueError:
+        pass
+
+    try:
         return _export_controlled_gate(
             gate, applied_qubit_indices, q_register, custom_names
         )
@@ -149,6 +154,26 @@ def _export_gate_via_mapping(gate, applied_qubit_indices, q_register, custom_nam
     qiskit_qubits = [q_register[index] for index in applied_qubit_indices]
 
     return qiskit_cls(*qiskit_params), qiskit_qubits, []
+
+
+def _export_dagger_gate(
+    gate: _gates.Dagger,
+    applied_qubit_indices,
+    q_register,
+    custom_names,
+):
+    if not isinstance(gate, _gates.Dagger):
+        # Raising an exception here is redundant to the type hint, but it allows us
+        # to handle exporting all gates in the same way, regardless of type
+        raise ValueError(f"Can't export gate {gate} as a dagger gate")
+
+    target_gate, qiskit_qubits, qiskit_clbits = _export_gate_to_qiskit(
+        gate.wrapped_gate,
+        applied_qubit_indices=applied_qubit_indices,
+        q_register=q_register,
+        custom_names=custom_names,
+    )
+    return target_gate.inverse(), qiskit_qubits, qiskit_clbits
 
 
 def _export_controlled_gate(
