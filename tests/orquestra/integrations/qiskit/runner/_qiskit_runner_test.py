@@ -139,10 +139,30 @@ def test_qiskit_runner_passes_coupling_map_to_execute_function():
     execute_func = Mock(wraps=execute)
 
     runner = QiskitRunner(
-        Aer.get_backend("statevector_simulator"),
+        Aer.get_backend("aer_simulator_statevector"),
         coupling_map=coupling_map,
         execute_function=execute_func,
     )
 
     runner.run_and_measure(circuit, n_samples=10)
     assert execute_func.call_args.kwargs["coupling_map"] == coupling_map
+
+
+@pytest.mark.parametrize(
+    "runner",
+    [
+        *[
+            QiskitRunner(Aer.get_backend(name), discard_extra_measurements=True)
+            for name in COMPATIBLE_BACKENDS
+        ]
+    ],
+    ids=_test_id,
+)
+def test_qiskit_runner_discards_extra_measurements_exact_num_measurements_is_true(
+    runner: QiskitRunner,
+):
+    circuits = [Circuit([X(0), CNOT(0, 1)])] * 3
+    n_samples = [5, 10, 15]
+    result = runner.run_batch_and_measure(circuits, n_samples=n_samples)
+
+    assert [len(r.bitstrings) for r in result] == n_samples

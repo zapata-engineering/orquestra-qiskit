@@ -3,7 +3,7 @@ from typing import List, Optional, Sequence, Union
 from orquestra.quantum.api import BaseCircuitRunner
 from orquestra.quantum.circuits import (
     Circuit,
-    combine_measurement_counts,
+    combine_bitstrings,
     expand_sample_sizes,
     split_into_batches,
 )
@@ -38,6 +38,7 @@ class QiskitRunner(BaseCircuitRunner):
         basis_gates: Optional[List[str]] = None,
         optimization_level: int = 0,
         seed: Optional[int] = None,
+        discard_extra_measurements: bool = False,
         execute_function=execute,
     ):
         super().__init__()
@@ -56,6 +57,7 @@ class QiskitRunner(BaseCircuitRunner):
 
         self.coupling_map = coupling_map
         self._execute = execute_function
+        self.discard_extra_measurements = discard_extra_measurements
 
     def _run_and_measure(self, circuit: Circuit, n_samples: int) -> Measurements:
         return self._run_batch_and_measure([circuit], [n_samples])[0]
@@ -90,6 +92,7 @@ class QiskitRunner(BaseCircuitRunner):
                 optimization_level=self.optimization_level,
                 seed_simulator=self.seed,
                 seed_transpiler=self.seed,
+                memory=True,
             )
             for circuits, n_samples in batches
         ]
@@ -97,15 +100,28 @@ class QiskitRunner(BaseCircuitRunner):
         # Qiskit runners return single dictionary with counts when there was
         # only one experiment. To simplify logic, we make sure to always have a
         # list of counts from a job.
-        all_counts = [
-            counts for job in jobs for counts in _listify(job.result().get_counts())
+
+        # For whatever reason, one can use job.result().get_counts() to get all
+        # counts, but job.result().get_memory() does require index of the experiment
+        # ¯\_(ツ)_/¯
+        # This is why the below list comprehension looks so clumsy.
+        all_bitstrings = [
+            job.result().get_memory(i)
+            for job in jobs
+            for i in range(len(job.result().results))
         ]
 
-        combined_measurement_counts = [
-            Measurements.from_counts(
-                {key[::-1]: value for key, value in counts.items()}
-            )
-            for counts in combine_measurement_counts(all_counts, multiplicities)
-        ]
+        combined_bitstrings = combine_bitstrings(all_bitstrings, multiplicities)
 
-        return combined_measurement_counts
+        if self.discard_extra_measurements:
+            combined_bitstrings = [
+                bitstrings[:n_samples]
+                for bitstrings, n_samples in zip(
+                    combined_bitstrings, samples_per_circuit
+                )
+            ]
+
+        return [
+            Measurements([tuple(map(int, b[::-1])) for b in bitstrings])
+            for bitstrings in combined_bitstrings
+        ]
