@@ -12,8 +12,9 @@ from orquestra.quantum.circuits import CNOT, Circuit, H, X
 from orquestra.quantum.estimation import estimate_expectation_values_by_averaging
 from orquestra.quantum.measurements import ExpectationValues
 from orquestra.quantum.operators import PauliTerm
-from qiskit import Aer, QiskitError, execute
+from qiskit import QiskitError, execute
 from qiskit.transpiler import CouplingMap
+from qiskit_aer import Aer
 
 from orquestra.integrations.qiskit.noise import get_qiskit_noise_model
 from orquestra.integrations.qiskit.runner import QiskitRunner

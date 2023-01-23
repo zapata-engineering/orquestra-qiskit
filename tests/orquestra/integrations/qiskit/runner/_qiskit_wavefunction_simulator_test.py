@@ -5,11 +5,11 @@ from orquestra.quantum.api.wavefunction_simulator_contracts import (
     simulator_contracts_with_nontrivial_initial_state,
 )
 from orquestra.quantum.circuits import CNOT, Circuit, X
-from qiskit import Aer
+from qiskit_aer import Aer
 
 from orquestra.integrations.qiskit.simulator import QiskitWavefunctionSimulator
 
-STATEVECTOR_BACKENDS = ["aer_simulator_statevector", "statevector_simulator"]
+STATEVECTOR_BACKENDS = ["aer_simulator_statevector"]
 
 
 def _test_id(val):
