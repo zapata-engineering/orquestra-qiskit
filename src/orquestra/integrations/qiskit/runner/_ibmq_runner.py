@@ -39,6 +39,7 @@ def create_ibmq_runner(
     seed: Optional[int] = None,
     retry_delay_seconds: int = 60,
     retry_timeout_seconds: int = 24 * 60 * 60,  # default timeout of one day
+    discard_extra_measurements=False,
 ):
     try:
         IBMQ.enable_account(api_token)
@@ -61,4 +62,5 @@ def create_ibmq_runner(
         execute_function=_execute_on_ibmq_with_retries(
             retry_delay_seconds, retry_timeout_seconds
         ),
+        discard_extra_measurements=discard_extra_measurements,
     )
