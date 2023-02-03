@@ -101,9 +101,8 @@ class QiskitRunner(BaseCircuitRunner):
         # only one experiment. To simplify logic, we make sure to always have a
         # list of counts from a job.
 
-        # For whatever reason, one can use job.result().get_counts() to get all
-        # counts, but job.result().get_memory() does require index of the experiment
-        # ¯\_(ツ)_/¯
+        # One can use job.result().get_counts() to get all counts, but job.result().get_memory()
+        # does require index of the experiment
         # This is why the below list comprehension looks so clumsy.
         all_bitstrings = [
             job.result().get_memory(i)
