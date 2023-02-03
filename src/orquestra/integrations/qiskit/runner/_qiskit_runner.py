@@ -1,5 +1,6 @@
 from typing import List, Optional, Sequence, Union
 
+from orquestra.integrations.qiskit.conversions import export_to_qiskit
 from orquestra.quantum.api import BaseCircuitRunner
 from orquestra.quantum.circuits import (
     Circuit,
@@ -12,8 +13,6 @@ from qiskit import ClassicalRegister, QuantumCircuit, execute
 from qiskit.providers import BackendV1, BackendV2
 from qiskit.transpiler import CouplingMap
 from qiskit_aer.noise import NoiseModel
-
-from orquestra.integrations.qiskit.conversions import export_to_qiskit
 
 AnyQiskitBackend = Union[BackendV1, BackendV2]
 
@@ -101,8 +100,8 @@ class QiskitRunner(BaseCircuitRunner):
         # only one experiment. To simplify logic, we make sure to always have a
         # list of counts from a job.
 
-        # One can use job.result().get_counts() to get all counts, but job.result().get_memory()
-        # does require index of the experiment
+        # One can use job.result().get_counts() to get all counts, but
+        # job.result().get_memory() does require index of the experiment
         # This is why the below list comprehension looks so clumsy.
         all_bitstrings = [
             job.result().get_memory(i)
