@@ -40,6 +40,7 @@ ORQUESTRA_QISKIT_GATE_MAP = {
     _builtin_gates.Y: qiskit.circuit.library.YGate,
     _builtin_gates.Z: qiskit.circuit.library.ZGate,
     _builtin_gates.S: qiskit.circuit.library.SGate,
+    _builtin_gates.SX: qiskit.circuit.library.SXGate,
     _builtin_gates.T: qiskit.circuit.library.TGate,
     _builtin_gates.H: qiskit.circuit.library.HGate,
     _builtin_gates.I: qiskit.circuit.library.IGate,
@@ -56,6 +57,7 @@ ORQUESTRA_QISKIT_GATE_MAP = {
     _builtin_gates.YY: qiskit.circuit.library.RYYGate,
     _builtin_gates.ZZ: qiskit.circuit.library.RZZGate,
     _builtin_gates.U3: qiskit.circuit.library.U3Gate,
+    _builtin_gates.RESET: qiskit.circuit.library.Reset,
     _builtin_gates.Delay: qiskit.circuit.Delay,
 }
 
@@ -82,6 +84,7 @@ def _make_controlled_gate_prototype(wrapped_gate_ref, num_control_qubits=1):
 
 QISKIT_ORQUESTRA_GATE_MAP = {
     **{q_cls: z_ref for z_ref, q_cls in ORQUESTRA_QISKIT_GATE_MAP.items()},
+    qiskit.extensions.SXdgGate: _builtin_gates.SX.dagger,
     qiskit.extensions.SdgGate: _builtin_gates.S.dagger,
     qiskit.extensions.TdgGate: _builtin_gates.T.dagger,
     qiskit.circuit.library.CSwapGate: _builtin_gates.SWAP.controlled(1),
