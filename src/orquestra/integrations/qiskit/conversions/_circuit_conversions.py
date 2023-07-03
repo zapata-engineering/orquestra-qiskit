@@ -7,7 +7,13 @@ from typing import Dict, Iterable, List, NamedTuple, Sequence, Tuple, Union
 import numpy as np
 import qiskit
 import sympy
-from orquestra.quantum.circuits import _builtin_gates, _circuit, _gates
+from orquestra.quantum.circuits import (
+    _builtin_gates,
+    _circuit,
+    _gates,
+    _operations,
+    _wavefunction_operations,
+)
 from orquestra.quantum.circuits.symbolic.sympy_expressions import (
     SYMPY_DIALECT,
     expression_from_sympy,
@@ -40,6 +46,7 @@ ORQUESTRA_QISKIT_GATE_MAP = {
     _builtin_gates.Y: qiskit.circuit.library.YGate,
     _builtin_gates.Z: qiskit.circuit.library.ZGate,
     _builtin_gates.S: qiskit.circuit.library.SGate,
+    _builtin_gates.SX: qiskit.circuit.library.SXGate,
     _builtin_gates.T: qiskit.circuit.library.TGate,
     _builtin_gates.H: qiskit.circuit.library.HGate,
     _builtin_gates.I: qiskit.circuit.library.IGate,
@@ -82,6 +89,7 @@ def _make_controlled_gate_prototype(wrapped_gate_ref, num_control_qubits=1):
 
 QISKIT_ORQUESTRA_GATE_MAP = {
     **{q_cls: z_ref for z_ref, q_cls in ORQUESTRA_QISKIT_GATE_MAP.items()},
+    qiskit.extensions.SXdgGate: _builtin_gates.SX.dagger,
     qiskit.extensions.SdgGate: _builtin_gates.S.dagger,
     qiskit.extensions.TdgGate: _builtin_gates.T.dagger,
     qiskit.circuit.library.CSwapGate: _builtin_gates.SWAP.controlled(1),
@@ -94,18 +102,30 @@ QISKIT_ORQUESTRA_GATE_MAP = {
 def export_to_qiskit(circuit: _circuit.Circuit) -> qiskit.QuantumCircuit:
     q_circuit = qiskit.QuantumCircuit(circuit.n_qubits)
     q_register = qiskit.circuit.QuantumRegister(circuit.n_qubits, "q")
+    gate_op_only_circuit = _circuit.Circuit(
+        [op for op in circuit.operations if isinstance(op, _gates.GateOperation)]
+    )
     custom_names = {
-        gate_def.gate_name for gate_def in circuit.collect_custom_gate_definitions()
+        gate_def.gate_name
+        for gate_def in gate_op_only_circuit.collect_custom_gate_definitions()
     }
-    q_triplets = [
-        _export_gate_to_qiskit(
-            gate_op.gate,
-            applied_qubit_indices=gate_op.qubit_indices,
-            q_register=q_register,
-            custom_names=custom_names,
-        )
-        for gate_op in circuit.operations
-    ]
+    q_triplets = []
+    for gate_op in circuit.operations:
+        if isinstance(gate_op, _gates.GateOperation):
+            q_triplet = _export_gate_to_qiskit(
+                gate_op.gate,
+                applied_qubit_indices=gate_op.qubit_indices,
+                q_register=q_register,
+                custom_names=custom_names,
+            )
+        elif isinstance(gate_op, _wavefunction_operations.ResetOperation):
+            q_triplet = (
+                qiskit.circuit.library.Reset(),
+                [q_register[gate_op.qubit_indices[0]]],
+                [],
+            )
+        q_triplets.append(q_triplet)
+
     for q_gate, q_qubits, q_clbits in q_triplets:
         q_circuit.append(q_gate, q_qubits, q_clbits)
     return q_circuit
@@ -240,7 +260,7 @@ class AnonGateOperation(NamedTuple):
     qubit_indices: Tuple[int, ...]
 
 
-ImportedOperation = Union[_gates.GateOperation, AnonGateOperation]
+ImportedOperation = Union[_operations.Operation, AnonGateOperation]
 
 
 def _apply_custom_gate(
@@ -308,7 +328,12 @@ def _import_qiskit_op(qiskit_op, qiskit_qubits) -> ImportedOperation:
 def _import_qiskit_op_via_mapping(
     qiskit_gate: qiskit.circuit.Instruction,
     qiskit_qubits: Iterable[qiskit.circuit.Qubit],
-) -> _gates.GateOperation:
+) -> _operations.Operation:
+    qubit_indices = [_import_qiskit_qubit(qubit) for qubit in qiskit_qubits]
+
+    if isinstance(qiskit_gate, qiskit.circuit.library.Reset):
+        return _wavefunction_operations.ResetOperation(qubit_indices[0])
+
     try:
         gate_ref = QISKIT_ORQUESTRA_GATE_MAP[type(qiskit_gate)]
     except KeyError:
@@ -320,7 +345,6 @@ def _import_qiskit_op_via_mapping(
     orquestra_params = [
         _orquestra_expr_from_qiskit(param) for param in qiskit_gate.params
     ]
-    qubit_indices = [_import_qiskit_qubit(qubit) for qubit in qiskit_qubits]
     gate = _make_gate_instance(gate_ref, orquestra_params)
     return _gates.GateOperation(gate=gate, qubit_indices=tuple(qubit_indices))
 

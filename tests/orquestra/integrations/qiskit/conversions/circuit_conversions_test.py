@@ -6,7 +6,12 @@ import pytest
 import qiskit
 import qiskit.circuit.random
 import sympy
-from orquestra.quantum.circuits import _builtin_gates, _circuit, _gates
+from orquestra.quantum.circuits import (
+    _builtin_gates,
+    _circuit,
+    _gates,
+    _wavefunction_operations,
+)
 
 from orquestra.integrations.qiskit.conversions import (
     export_to_qiskit,
@@ -23,6 +28,7 @@ EQUIVALENT_NON_PARAMETRIC_GATES = [
     (_builtin_gates.H, qiskit.circuit.library.HGate()),
     (_builtin_gates.I, qiskit.circuit.library.IGate()),
     (_builtin_gates.S, qiskit.circuit.library.SGate()),
+    (_builtin_gates.SX, qiskit.circuit.library.SXGate()),
     (_builtin_gates.T, qiskit.circuit.library.TGate()),
     (_builtin_gates.CNOT, qiskit.extensions.CXGate()),
     (_builtin_gates.CZ, qiskit.extensions.CZGate()),
@@ -136,7 +142,7 @@ class TestCU3GateConversion:
 
 # NOTE: In Qiskit, 0 is the most significant qubit,
 # whereas in Orquestra, 0 is the least significant qubit.
-# This is we need to flip the indices.
+# Thus, we need to flip the indices.
 #
 # See more at
 # https://qiskit.org/documentation/tutorials/circuits/1_getting_started_with_qiskit.html#Visualize-Circuit
@@ -202,6 +208,36 @@ EQUIVALENT_NON_PARAMETRIZED_CIRCUITS = [
             6,
             [
                 ("tdg", (0,)),
+            ],
+        ),
+    ),
+    (
+        _circuit.Circuit(
+            [
+                _wavefunction_operations.ResetOperation(0),
+            ],
+            6,
+        ),
+        _make_qiskit_circuit(
+            6,
+            [
+                ("reset", (0,)),
+            ],
+        ),
+    ),
+    (
+        _circuit.Circuit(
+            [
+                _builtin_gates.X(0),
+                _wavefunction_operations.ResetOperation(0),
+            ],
+            6,
+        ),
+        _make_qiskit_circuit(
+            6,
+            [
+                ("x", (0,)),
+                ("reset", (0,)),
             ],
         ),
     ),
