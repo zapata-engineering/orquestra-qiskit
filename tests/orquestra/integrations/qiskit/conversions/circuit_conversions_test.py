@@ -10,7 +10,12 @@ from orquestra.integrations.qiskit.conversions import (
     export_to_qiskit,
     import_from_qiskit,
 )
-from orquestra.quantum.circuits import _builtin_gates, _circuit, _gates
+from orquestra.quantum.circuits import (
+    _builtin_gates,
+    _circuit,
+    _gates,
+    _wavefunction_operations,
+)
 
 # --------- gates ---------
 
@@ -208,7 +213,7 @@ EQUIVALENT_NON_PARAMETRIZED_CIRCUITS = [
     (
         _circuit.Circuit(
             [
-                _builtin_gates.RESET(0),
+                _wavefunction_operations.ResetOperation(0),
             ],
             6,
         ),
@@ -223,7 +228,7 @@ EQUIVALENT_NON_PARAMETRIZED_CIRCUITS = [
         _circuit.Circuit(
             [
                 _builtin_gates.X(0),
-                _builtin_gates.RESET(0),
+                _wavefunction_operations.ResetOperation(0),
             ],
             6,
         ),
