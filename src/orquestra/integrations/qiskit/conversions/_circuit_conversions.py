@@ -260,7 +260,7 @@ class AnonGateOperation(NamedTuple):
     qubit_indices: Tuple[int, ...]
 
 
-ImportedOperation = Union[_gates.GateOperation, AnonGateOperation]
+ImportedOperation = Union[_operations.Operation, AnonGateOperation]
 
 
 def _apply_custom_gate(
