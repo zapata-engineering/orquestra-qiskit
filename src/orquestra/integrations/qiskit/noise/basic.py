@@ -12,10 +12,9 @@ from qiskit.providers.aer.noise import (
     phase_amplitude_damping_error,
     phase_damping_error,
 )
-from qiskit.providers.ibmq import IBMQ
-from qiskit.providers.ibmq.exceptions import IBMQAccountError, IBMQProviderError
 from qiskit.quantum_info import Kraus
 from qiskit.transpiler import CouplingMap
+from qiskit_ibm_provider import IBMProvider, IBMAccountError
 
 
 def get_qiskit_noise_model(
@@ -33,23 +32,16 @@ def get_qiskit_noise_model(
         group: The ibmq group (see qiskit documentation)
         project: The ibmq project (see qiskit documentation)
         api_token: The ibmq api token (see qiskit documentation)
-
-
     """
     if api_token is not None and api_token != "None":
-        try:
-            IBMQ.enable_account(api_token)
-        except IBMQAccountError as e:
-            if (
-                e.message
-                != "An IBM Quantum Experience account is already in use for the session."  # noqa: E501
-            ):
-                raise RuntimeError(e)
+        ibm_token = api_token
+    else:
+        ibm_token = None
 
     # Get qiskit noise model from qiskit
     try:
-        provider = IBMQ.get_provider(hub=hub, group=group, project=project)
-    except IBMQProviderError as e:
+        provider = IBMProvider(token=ibm_token, instance=f"{hub}/{group}/{project}")
+    except IBMAccountError as e:
         if api_token is None:
             raise RuntimeError("No providers were found. Missing IBMQ API token?")
         else:
