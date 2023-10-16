@@ -14,7 +14,7 @@ from qiskit.providers.aer.noise import (
 )
 from qiskit.quantum_info import Kraus
 from qiskit.transpiler import CouplingMap
-from qiskit_ibm_provider import IBMProvider, IBMAccountError
+from qiskit_ibm_provider import IBMProvider, IBMAccountError  # type: ignore
 
 
 def get_qiskit_noise_model(
