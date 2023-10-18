@@ -5,7 +5,13 @@ import pytest
 from orquestra.quantum.api.circuit_runner_contracts import CIRCUIT_RUNNER_CONTRACTS
 from orquestra.quantum.circuits import CNOT, Circuit, H
 from qiskit.result import Result
-from qiskit_ibm_provider import IBMBackendApiError, IBMJob  # type: ignore
+from qiskit_ibm_provider import (  # type: ignore
+    IBMBackend,
+    IBMBackendApiError,
+    IBMJob,
+    IBMProvider,
+)
+from qiskit_ibm_provider.ibm_backend import QasmBackendConfiguration  # type: ignore
 
 from orquestra.integrations.qiskit.runner import create_ibmq_runner
 
@@ -26,6 +32,24 @@ def mock_execute(monkeypatch: pytest.MonkeyPatch):
         "orquestra.integrations.qiskit.runner._ibmq_runner.execute", execute
     )
     return execute
+
+
+@pytest.fixture
+def mock_ibm_backend(monkeypatch: pytest.MonkeyPatch):
+    """This mocks enough of an IBM backend to run the tests"""
+    backend_config = create_autospec(QasmBackendConfiguration)
+    backend_config.max_shots = 1000
+
+    backend = create_autospec(IBMBackend)
+    backend.configuration.return_value = backend_config
+
+    provider = create_autospec(IBMProvider)
+    provider.get_backend.return_value = backend
+
+    get_provider = Mock(return_value=provider)
+    monkeypatch.setattr(
+        "orquestra.integrations.qiskit.runner._ibmq_runner.get_provider", get_provider
+    )
 
 
 @pytest.mark.parametrize("contract", CIRCUIT_RUNNER_CONTRACTS)
@@ -61,7 +85,7 @@ def test_ibmq_runner_discards_extra_measurements_if_exact_num_measurements_is_tr
     assert [len(r.bitstrings) for r in result] == n_samples
 
 
-def test_raises_on_unknown_backend_error(mock_execute: Mock):
+def test_raises_on_unknown_backend_error(mock_execute: Mock, mock_ibmprovider: Mock):
     mock_execute.side_effect = IBMBackendApiError("unknown backend error")
     runner = create_ibmq_runner(
         api_token="mocked api token",
@@ -75,7 +99,7 @@ def test_raises_on_unknown_backend_error(mock_execute: Mock):
 
 
 def test_retry_on_too_many_jobs_error(
-    mock_execute: Mock, monkeypatch: pytest.MonkeyPatch
+    mock_execute: Mock, mock_ibm_backend: Mock, monkeypatch: pytest.MonkeyPatch
 ):
     # Given
     # This mocks the response from IBM's API
