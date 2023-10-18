@@ -80,7 +80,7 @@ def test_ibmq_runner_discards_extra_measurements_if_exact_num_measurements_is_tr
     assert [len(r.bitstrings) for r in result] == n_samples
 
 
-def test_raises_on_unknown_backend_error(mock_execute: Mock, mock_ibmprovider: Mock):
+def test_raises_on_unknown_backend_error(mock_execute: Mock, mock_ibm_backend: Mock):
     mock_execute.side_effect = IBMBackendApiError("unknown backend error")
     runner = create_ibmq_runner(
         api_token="mocked api token",
