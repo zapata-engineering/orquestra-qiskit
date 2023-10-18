@@ -4,12 +4,9 @@ from typing import List, Optional
 
 from qiskit import execute
 from qiskit_aer.noise import NoiseModel
-from qiskit_ibm_provider import (  # type: ignore
-    IBMAccountError,
-    IBMBackendApiError,
-    IBMProvider,
-)
+from qiskit_ibm_provider import IBMBackendApiError  # type: ignore
 
+from .._get_provider import get_provider
 from ._qiskit_runner import QiskitRunner
 
 
@@ -49,10 +46,7 @@ def create_ibmq_runner(
     retry_timeout_seconds: int = 24 * 60 * 60,  # default timeout of one day
     discard_extra_measurements=False,
 ):
-    try:
-        provider = IBMProvider(token=api_token, instance=f"{hub}/{group}/{project}")
-    except IBMAccountError as e:
-        raise RuntimeError(e)
+    provider = get_provider(api_token=api_token, hub=hub, group=group, project=project)
     backend = provider.get_backend(name=backend_name)
 
     return QiskitRunner(

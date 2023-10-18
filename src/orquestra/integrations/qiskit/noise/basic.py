@@ -14,7 +14,8 @@ from qiskit.providers.aer.noise import (
 )
 from qiskit.quantum_info import Kraus
 from qiskit.transpiler import CouplingMap
-from qiskit_ibm_provider import IBMAccountError, IBMProvider  # type: ignore
+
+from .._get_provider import get_provider
 
 
 def get_qiskit_noise_model(
@@ -33,19 +34,8 @@ def get_qiskit_noise_model(
         project: The ibmq project (see qiskit documentation)
         api_token: The ibmq api token (see qiskit documentation)
     """
-    if api_token is not None and api_token != "None":
-        ibm_token = api_token
-    else:
-        ibm_token = None
-
     # Get qiskit noise model from qiskit
-    try:
-        provider = IBMProvider(token=ibm_token, instance=f"{hub}/{group}/{project}")
-    except IBMAccountError as e:
-        if api_token is None:
-            raise RuntimeError("No providers were found. Missing IBMQ API token?")
-        else:
-            raise RuntimeError(e)
+    provider = get_provider(api_token=api_token, hub=hub, group=group, project=project)
 
     noisy_device = provider.get_backend(device_name)
     noise_model = AerNoise.NoiseModel.from_backend(noisy_device)
