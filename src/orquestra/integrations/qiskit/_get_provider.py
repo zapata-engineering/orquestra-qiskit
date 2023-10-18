@@ -1,7 +1,7 @@
 from typing import Optional
 
-from qiskit_ibm_provider import IBMAccountError, IBMProvider  # type: ignore
-from qiskit_ibm_provider.api.exceptions import RequestsApiError  # type: ignore
+from qiskit_ibm_provider import IBMAccountError, IBMProvider
+from qiskit_ibm_provider.api.exceptions import RequestsApiError
 
 
 def get_provider(

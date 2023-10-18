@@ -1,8 +1,8 @@
 from unittest.mock import Mock, create_autospec
 
 import pytest
-from qiskit_ibm_provider import IBMAccountError  # type: ignore
-from qiskit_ibm_provider.api.exceptions import RequestsApiError  # type: ignore
+from qiskit_ibm_provider import IBMAccountError
+from qiskit_ibm_provider.api.exceptions import RequestsApiError
 
 from orquestra.integrations.qiskit import _get_provider
 

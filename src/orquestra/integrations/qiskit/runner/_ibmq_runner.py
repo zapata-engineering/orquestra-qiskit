@@ -4,7 +4,7 @@ from typing import List, Optional
 
 from qiskit import execute
 from qiskit_aer.noise import NoiseModel
-from qiskit_ibm_provider import IBMBackendApiError  # type: ignore
+from qiskit_ibm_provider import IBMBackendApiError
 
 from .._get_provider import get_provider
 from ._qiskit_runner import QiskitRunner

@@ -5,13 +5,8 @@ import pytest
 from orquestra.quantum.api.circuit_runner_contracts import CIRCUIT_RUNNER_CONTRACTS
 from orquestra.quantum.circuits import CNOT, Circuit, H
 from qiskit.result import Result
-from qiskit_ibm_provider import (  # type: ignore
-    IBMBackend,
-    IBMBackendApiError,
-    IBMJob,
-    IBMProvider,
-)
-from qiskit_ibm_provider.ibm_backend import QasmBackendConfiguration  # type: ignore
+from qiskit_ibm_provider import IBMBackend, IBMBackendApiError, IBMJob, IBMProvider
+from qiskit_ibm_provider.ibm_backend import QasmBackendConfiguration
 
 from orquestra.integrations.qiskit.runner import create_ibmq_runner
 
