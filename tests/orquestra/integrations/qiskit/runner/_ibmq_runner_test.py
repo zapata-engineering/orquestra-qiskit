@@ -5,7 +5,7 @@ import pytest
 from orquestra.quantum.api.circuit_runner_contracts import CIRCUIT_RUNNER_CONTRACTS
 from orquestra.quantum.circuits import CNOT, Circuit, H
 from qiskit.result import Result
-from qiskit_ibm_provider import IBMBackendApiError, IBMJob
+from qiskit_ibm_provider import IBMBackendApiError, IBMJob  # type: ignore
 
 from orquestra.integrations.qiskit.runner import create_ibmq_runner
 
@@ -64,7 +64,7 @@ def test_ibmq_runner_discards_extra_measurements_if_exact_num_measurements_is_tr
 def test_raises_on_unknown_backend_error(mock_execute: Mock):
     mock_execute.side_effect = IBMBackendApiError("unknown backend error")
     runner = create_ibmq_runner(
-        api_token=os.getenv("ZAPATA_IBMQ_API_TOKEN"),
+        api_token="mocked api token",
         backend_name="ibmq_qasm_simulator",
         retry_delay_seconds=1,
     )
@@ -94,7 +94,7 @@ def test_retry_on_too_many_jobs_error(
     monkeypatch.setattr("time.sleep", mock_sleep)
 
     runner = create_ibmq_runner(
-        api_token="not important",
+        api_token="mocked api token",
         backend_name="ibmq_qasm_simulator",
         retry_delay_seconds=1,
     )

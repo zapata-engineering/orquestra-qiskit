@@ -1,8 +1,8 @@
 from unittest.mock import Mock, create_autospec
 
 import pytest
-from qiskit_ibm_provider import IBMAccountError
-from qiskit_ibm_provider.api.exceptions import RequestsApiError
+from qiskit_ibm_provider import IBMAccountError  # type: ignore
+from qiskit_ibm_provider.api.exceptions import RequestsApiError  # type: ignore
 
 from orquestra.integrations.qiskit import _get_provider
 
@@ -68,7 +68,7 @@ def test_raises_runtime_error_on_empty_api_token(hub: str, group: str, project: 
 
 
 def test_raises_runtime_error_on_account_error_none_token(
-    hub: str, group: str, project: str
+    mock_ibmprovider: Mock, hub: str, group: str, project: str
 ):
     api_token = None
     mock_ibmprovider.side_effect = IBMAccountError("account problem")
