@@ -21,7 +21,7 @@ from orquestra.integrations.qiskit.noise.basic import (
 class TestBasic(unittest.TestCase):
     def setUp(self):
         self.ibmq_api_token = os.getenv("ZAPATA_IBMQ_API_TOKEN")
-        self.all_devices = ["ibm_nairobi"]
+        self.all_devices = ["ibm_kyoto"]
         self.T_1 = 10e-7
         self.T_2 = 30e-7
         self.t_step = 10e-9
