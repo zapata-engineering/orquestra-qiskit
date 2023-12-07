@@ -18,18 +18,12 @@
 """
 Translates OpenFermion Objects to qiskit SummedOp objects
 """
-import warnings
-
 from orquestra.quantum.operators import PauliRepresentation, PauliSum, PauliTerm
 
-with warnings.catch_warnings():
-    warnings.filterwarnings("ignore", category=DeprecationWarning)
-    from qiskit.quantum_info import SparsePauliOp
-
-import typing as T
+from qiskit.quantum_info import SparsePauliOp
 
 
-def qubitop_to_qiskitpauli(operator: PauliRepresentation) -> T.List[SparsePauliOp]:
+def qubitop_to_qiskitpauli(operator: PauliRepresentation) -> SparsePauliOp:
     """Convert a PauliRepresentation to a SummedOp.
 
     Args:
@@ -51,9 +45,9 @@ def qubitop_to_qiskitpauli(operator: PauliRepresentation) -> T.List[SparsePauliO
         terms.append((string_term, term.coefficient))
 
     if not terms:
-        return SparsePauliOp("").group_commuting()
-
-    return SparsePauliOp.from_list(terms).group_commuting()
+        return SparsePauliOp("")
+    else:
+        return SparsePauliOp.from_list(terms)
 
 
 def qiskitpauli_to_qubitop(qiskit_pauli: SparsePauliOp) -> PauliSum:

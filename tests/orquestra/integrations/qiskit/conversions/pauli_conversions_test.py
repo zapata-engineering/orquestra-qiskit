@@ -49,7 +49,7 @@ def test_paulisum_to_qiskitpauli():
 
     qiskit_op = qubitop_to_qiskitpauli(pauli_term)
 
-    truth = SparsePauliOp.from_list([("XZX", 0.5), ("YZY", 0.5)]).group_commuting()
+    truth = SparsePauliOp.from_list([("XZX", 0.5), ("YZY", 0.5)])
 
     assert truth == qiskit_op
 
@@ -62,7 +62,7 @@ def test_pauliterm_to_qiskitpauli():
 
     qiskit_op = qubitop_to_qiskitpauli(pauli_term)
 
-    truth = SparsePauliOp.from_list([("YXZIX", 2.25)]).group_commuting()
+    truth = SparsePauliOp.from_list([("YXZIX", 2.25)])
 
     assert truth == qiskit_op
 
@@ -70,7 +70,7 @@ def test_pauliterm_to_qiskitpauli():
 def test_qubitop_to_qiskitpauli_zero():
     zero_term = PauliSum()
     qiskit_term = qubitop_to_qiskitpauli(zero_term)
-    ground_truth = [SparsePauliOp("")]
+    ground_truth = SparsePauliOp("")
 
     assert ground_truth == qiskit_term
 
@@ -80,7 +80,6 @@ def test_qiskitpauli_to_qubitop():
     Conversion of qiskit SummedOp to PauliSum; accuracy test
     """
     qiskit_term = SparsePauliOp.from_list([("XIIIIY", 1)])
-    # qiskit_term = SummedOp([PauliOp(Pauli("XIIIIY"), coeff=1)])
 
     expected_pauli_term = PauliTerm.from_iterable([("X", 0), ("Y", 5)])
     test_pauli_term = qiskitpauli_to_qubitop(qiskit_term)
