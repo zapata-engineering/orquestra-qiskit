@@ -18,12 +18,18 @@
 """
 Translates OpenFermion Objects to qiskit SummedOp objects
 """
+import warnings
+
 from orquestra.quantum.operators import PauliRepresentation, PauliSum, PauliTerm
-from qiskit.opflow import PauliOp, SummedOp
-from qiskit.quantum_info import Pauli
+
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=DeprecationWarning)
+    from qiskit.quantum_info import SparsePauliOp
+
+import typing as T
 
 
-def qubitop_to_qiskitpauli(operator: PauliRepresentation) -> SummedOp:
+def qubitop_to_qiskitpauli(operator: PauliRepresentation) -> T.List[SparsePauliOp]:
     """Convert a PauliRepresentation to a SummedOp.
 
     Args:
@@ -42,12 +48,15 @@ def qubitop_to_qiskitpauli(operator: PauliRepresentation) -> SummedOp:
             string_term = (
                 string_term[:term_qubit] + term_pauli + string_term[term_qubit + 1 :]
             )
-        terms.append(PauliOp(Pauli(string_term), coeff=term.coefficient))
+        terms.append((string_term, term.coefficient))
 
-    return SummedOp(terms)
+    if not terms:
+        return SparsePauliOp("").group_commuting()
+
+    return SparsePauliOp.from_list(terms).group_commuting()
 
 
-def qiskitpauli_to_qubitop(qiskit_pauli: SummedOp) -> PauliSum:
+def qiskitpauli_to_qubitop(qiskit_pauli: SparsePauliOp) -> PauliSum:
     """Convert a qiskit's SummedOp to a PauliSum.
 
     Args:
@@ -56,17 +65,14 @@ def qiskitpauli_to_qubitop(qiskit_pauli: SummedOp) -> PauliSum:
     Returns:
         PauliSum representing the SummedOp
     """
-
-    if not isinstance(qiskit_pauli, SummedOp):
-        raise TypeError("qiskit_pauli must be a qiskit SummedOp")
+    if not isinstance(qiskit_pauli, SparsePauliOp):
+        raise TypeError("qiskit_pauli must be SparsePauliOp object")
 
     transformed_operator = PauliSum()
 
-    for pauli_op in qiskit_pauli._oplist:
-        qiskit_term, weight = pauli_op.primitive, pauli_op.coeff
-
+    for qiskit_term, weight in zip(qiskit_pauli.paulis, qiskit_pauli.coeffs):
         orquestra_term = PauliTerm.identity()
-        for (term_qubit, term_pauli) in enumerate(str(qiskit_term)):
+        for term_qubit, term_pauli in enumerate(str(qiskit_term)):
             if term_pauli != "I":
                 if orquestra_term == PauliTerm.identity():
                     orquestra_term = PauliTerm(f"{term_pauli}{term_qubit}")

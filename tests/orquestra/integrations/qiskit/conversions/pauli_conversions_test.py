@@ -17,8 +17,7 @@
 
 import pytest
 from orquestra.quantum.operators import PauliSum, PauliTerm
-from qiskit.opflow import PauliOp, SummedOp
-from qiskit.quantum_info import Pauli
+from qiskit.quantum_info import SparsePauliOp
 
 from orquestra.integrations.qiskit.conversions import (
     qiskitpauli_to_qubitop,
@@ -32,8 +31,7 @@ def test_translation_type_enforcement():
     """
     sample_str = "Z0*Z1"
     sample_int = 1
-    qiskit_op = SummedOp([PauliOp(Pauli("YXZIX"), 2.25)])
-
+    qiskit_op = SparsePauliOp(["YXZIX"], 2.25)
     # don't accept anything other than orquestra PauliSum or PauliTerm
     with pytest.raises(TypeError):
         qubitop_to_qiskitpauli(sample_str)
@@ -51,11 +49,9 @@ def test_paulisum_to_qiskitpauli():
 
     qiskit_op = qubitop_to_qiskitpauli(pauli_term)
 
-    ground_truth = (
-        PauliOp(Pauli("XZX"), 0.5) + PauliOp(Pauli("YZY"), 0.5)
-    ).to_pauli_op()
+    truth = SparsePauliOp.from_list([("XZX", 0.5), ("YZY", 0.5)]).group_commuting()
 
-    assert ground_truth == qiskit_op
+    assert truth == qiskit_op
 
 
 def test_pauliterm_to_qiskitpauli():
@@ -66,15 +62,15 @@ def test_pauliterm_to_qiskitpauli():
 
     qiskit_op = qubitop_to_qiskitpauli(pauli_term)
 
-    ground_truth = SummedOp([PauliOp(Pauli("YXZIX"), 2.25)])
+    truth = SparsePauliOp.from_list([("YXZIX", 2.25)]).group_commuting()
 
-    assert ground_truth == qiskit_op
+    assert truth == qiskit_op
 
 
 def test_qubitop_to_qiskitpauli_zero():
     zero_term = PauliSum()
     qiskit_term = qubitop_to_qiskitpauli(zero_term)
-    ground_truth = SummedOp([])
+    ground_truth = [SparsePauliOp("")]
 
     assert ground_truth == qiskit_term
 
@@ -83,11 +79,11 @@ def test_qiskitpauli_to_qubitop():
     """
     Conversion of qiskit SummedOp to PauliSum; accuracy test
     """
-    qiskit_term = SummedOp([PauliOp(Pauli("XIIIIY"), coeff=1)])
+    qiskit_term = SparsePauliOp.from_list([("XIIIIY", 1)])
+    # qiskit_term = SummedOp([PauliOp(Pauli("XIIIIY"), coeff=1)])
 
     expected_pauli_term = PauliTerm.from_iterable([("X", 0), ("Y", 5)])
     test_pauli_term = qiskitpauli_to_qubitop(qiskit_term)
-
     assert test_pauli_term == expected_pauli_term
 
 
