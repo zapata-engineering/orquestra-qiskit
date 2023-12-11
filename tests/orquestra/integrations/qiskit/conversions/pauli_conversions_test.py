@@ -49,7 +49,7 @@ def test_paulisum_to_qiskitpauli():
 
     qiskit_op = qubitop_to_qiskitpauli(pauli_term)
 
-    ground_truth = SparsePauliOp(["XZX", "YZY"], coeffs=[0.5+0.j, 0.5+0.j])
+    ground_truth = SparsePauliOp(["XZX", "YZY"], coeffs=[0.5 + 0.0j, 0.5 + 0.0j])
 
     assert ground_truth == qiskit_op
 
@@ -62,7 +62,7 @@ def test_pauliterm_to_qiskitpauli():
 
     qiskit_op = qubitop_to_qiskitpauli(pauli_term)
 
-    ground_truth = SparsePauliOp(["YXZIX"], [2.25+0.j])
+    ground_truth = SparsePauliOp(["YXZIX"], [2.25 + 0.0j])
 
     assert ground_truth == qiskit_op
 
