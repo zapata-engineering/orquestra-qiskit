@@ -30,12 +30,12 @@ EQUIVALENT_NON_PARAMETRIC_GATES = [
     (_builtin_gates.S, qiskit.circuit.library.SGate()),
     (_builtin_gates.SX, qiskit.circuit.library.SXGate()),
     (_builtin_gates.T, qiskit.circuit.library.TGate()),
-    (_builtin_gates.CNOT, qiskit.extensions.CXGate()),
-    (_builtin_gates.CZ, qiskit.extensions.CZGate()),
-    (_builtin_gates.SWAP, qiskit.extensions.SwapGate()),
-    (_builtin_gates.ISWAP, qiskit.extensions.iSwapGate()),
-    (_builtin_gates.S.dagger, qiskit.extensions.SdgGate()),
-    (_builtin_gates.T.dagger, qiskit.extensions.TdgGate()),
+    (_builtin_gates.CNOT, qiskit.circuit.library.CXGate()),
+    (_builtin_gates.CZ, qiskit.circuit.library.CZGate()),
+    (_builtin_gates.SWAP, qiskit.circuit.library.SwapGate()),
+    (_builtin_gates.ISWAP, qiskit.circuit.library.iSwapGate()),
+    (_builtin_gates.S.dagger, qiskit.circuit.library.SdgGate()),
+    (_builtin_gates.T.dagger, qiskit.circuit.library.TdgGate()),
 ]
 
 EQUIVALENT_PARAMETRIC_GATES = [
@@ -45,10 +45,10 @@ EQUIVALENT_PARAMETRIC_GATES = [
         (_builtin_gates.RY, qiskit.circuit.library.RYGate),
         (_builtin_gates.RZ, qiskit.circuit.library.RZGate),
         (_builtin_gates.PHASE, qiskit.circuit.library.PhaseGate),
-        (_builtin_gates.CPHASE, qiskit.extensions.CPhaseGate),
-        (_builtin_gates.XX, qiskit.extensions.RXXGate),
-        (_builtin_gates.YY, qiskit.extensions.RYYGate),
-        (_builtin_gates.ZZ, qiskit.extensions.RZZGate),
+        (_builtin_gates.CPHASE, qiskit.circuit.library.CPhaseGate),
+        (_builtin_gates.XX, qiskit.circuit.library.RXXGate),
+        (_builtin_gates.YY, qiskit.circuit.library.RYYGate),
+        (_builtin_gates.ZZ, qiskit.circuit.library.RZZGate),
     ]
     for theta in [0, -1, np.pi / 5, 2 * np.pi]
 ]
@@ -106,7 +106,7 @@ class TestU3GateConversion:
         orquestra_matrix = np.array(
             _builtin_gates.U3(theta, phi, lambda_).matrix
         ).astype(np.complex128)
-        qiskit_matrix = qiskit.extensions.U3Gate(theta, phi, lambda_).to_matrix()
+        qiskit_matrix = qiskit.circuit.library.U3Gate(theta, phi, lambda_).to_matrix()
 
         np.testing.assert_allclose(orquestra_matrix, qiskit_matrix, atol=1e-7)
 
@@ -127,7 +127,7 @@ class TestCU3GateConversion:
             _builtin_gates.U3(theta, phi, lambda_).controlled(1)(0, 1).lifted_matrix(2)
         ).astype(np.complex128)
         qiskit_matrix = (
-            qiskit.extensions.U3Gate(theta, phi, lambda_).control(1).to_matrix()
+            qiskit.circuit.library.U3Gate(theta, phi, lambda_).control(1).to_matrix()
         )
 
         # Rearrange the qiskit matrix, such that it matches the endianness of orquestra
@@ -300,7 +300,10 @@ EQUIVALENT_NON_PARAMETRIZED_CIRCUITS = [
             [
                 (
                     "append",
-                    (qiskit.extensions.U3Gate(np.pi / 5, np.pi / 2, np.pi / 4), [2]),
+                    (
+                        qiskit.circuit.library.U3Gate(np.pi / 5, np.pi / 2, np.pi / 4),
+                        [2],
+                    ),
                 )
             ],
         ),
@@ -315,7 +318,7 @@ EQUIVALENT_NON_PARAMETRIZED_CIRCUITS = [
                 (
                     "append",
                     (
-                        qiskit.extensions.U3Gate(
+                        qiskit.circuit.library.U3Gate(
                             np.pi / 5, np.pi / 2, np.pi / 4
                         ).control(1),
                         [1, 2],
@@ -370,7 +373,7 @@ EQUIVALENT_PARAMETRIZED_CIRCUITS = [
                 (
                     "append",
                     (
-                        qiskit.extensions.U3Gate(
+                        qiskit.circuit.library.U3Gate(
                             QISKIT_THETA, QISKIT_GAMMA, QISKIT_LAMBDA
                         ),
                         [3],
@@ -393,7 +396,7 @@ EQUIVALENT_PARAMETRIZED_CIRCUITS = [
                 (
                     "append",
                     (
-                        qiskit.extensions.U3Gate(
+                        qiskit.circuit.library.U3Gate(
                             QISKIT_THETA, QISKIT_GAMMA, QISKIT_LAMBDA
                         ).control(1),
                         [2, 3],

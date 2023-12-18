@@ -108,7 +108,7 @@ def test_qiskit_runner_can_run_job_with_sample_size_exceeding_backends_limit(
 def noisy_simulator(request):
     ibmq_api_token = os.getenv("ZAPATA_IBMQ_API_TOKEN")
     noise_model, connectivity = get_qiskit_noise_model(
-        "ibm_nairobi", api_token=ibmq_api_token
+        "ibm_kyoto", api_token=ibmq_api_token
     )
     backend = Aer.get_backend(request.param)
     return QiskitRunner(backend, noise_model=noise_model, coupling_map=connectivity)

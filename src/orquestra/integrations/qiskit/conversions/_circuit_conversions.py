@@ -28,7 +28,7 @@ QiskitTriplet = Tuple[
 
 
 def _import_qiskit_qubit(qubit: qiskit.circuit.Qubit) -> int:
-    return qubit.index
+    return qubit._index
 
 
 def _qiskit_expr_from_orquestra(expr):
